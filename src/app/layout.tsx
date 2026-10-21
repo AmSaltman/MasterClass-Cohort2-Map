@@ -7,7 +7,7 @@ const sans = Inter_Tight({ variable: "--font-sans", subsets: ["latin"], weight: 
 const serif = Newsreader({ variable: "--font-serif", subsets: ["latin"], weight: ["400", "500"], style: ["normal", "italic"] });
 
 export const metadata: Metadata = {
-  title: "Cohort Map — MasterClass Executive",
+  title: "Fall '26 Cohort Map — MasterClass Executive",
   description: "Find and connect with your MasterClass Executive classmates around the world.",
   robots: { index: false, follow: false },
 };

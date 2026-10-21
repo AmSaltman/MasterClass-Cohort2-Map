@@ -5,9 +5,9 @@ import { initials } from "@/lib/squares";
 
 export function Logo({ href = "/" }: { href?: string }) {
   return (
-    <Link href={href} className="logo" aria-label="MasterClass Executive Map — home">
-      <span className="mc">MasterClass</span>
-      <span className="ex">Executive</span>
+    <Link href={href} className="logo" aria-label="Fall '26 Cohort Map — home">
+      <span className="mc">Fall &rsquo;26</span>
+      <span className="ex">Cohort</span>
       <span className="mp">Map</span>
     </Link>
   );
