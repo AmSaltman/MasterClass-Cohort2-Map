@@ -3,18 +3,12 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { I } from "@/components/Icons";
+import { ShiftSquare } from "@/components/Square";
 import { sb } from "@/lib/supabase-browser";
 
-const IntroGlobe = dynamic(() => import("@/components/IntroGlobe"), { ssr: false });
+const CTA: [string, string, string, string] = ["#D06B41", "#F2C94C", "#F5E8B5", "#EFA93B"];
 
-// The MasterClass "shifting square": rings grow outward forever (infinite zoom).
-function ShiftSquare() {
-  return (
-    <span className="shift" aria-hidden>
-      <i /><i /><i /><i />
-    </span>
-  );
-}
+const IntroGlobe = dynamic(() => import("@/components/IntroGlobe"), { ssr: false });
 
 export default function Landing() {
   const [signedIn, setSignedIn] = useState(false);
@@ -41,7 +35,7 @@ export default function Landing() {
         </p>
         <div className="landing-actions reveal r4">
           <Link href={signedIn ? "/map" : "/join"} className="join-btn">
-            <ShiftSquare />
+            <ShiftSquare colors={CTA} />
             <span className="join-label">{signedIn ? "Open the Map" : "Join the Map"} <I.arrow width={16} height={16} /></span>
           </Link>
           {!signedIn && (

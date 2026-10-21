@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { AvatarPicker, type AvatarChange } from "./AvatarPicker";
 import { CityInput } from "./CityInput";
-import { Square } from "./Square";
+import { ShiftSquare } from "./Square";
 import { api, sb, uploadAvatar } from "@/lib/supabase-browser";
 import type { ProfileInput } from "@/lib/types";
 
@@ -195,7 +195,7 @@ export function ProfileForm({ mode, initial, avatarUrl = null, seed = "you" }: {
       {stage && (
         <div className="processing" role="status" aria-live="polite">
           <div>
-            <Square seed={p.email || "you"} className="pulse" />
+            <ShiftSquare seed={p.email || "you"} className="big" />
             <h3>{stage}<span className="dot-y" /></h3>
             {ai ? (
               <p style={{ maxWidth: 460, margin: "10px auto 0" }}>

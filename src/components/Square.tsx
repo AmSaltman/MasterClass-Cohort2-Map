@@ -29,6 +29,23 @@ export function Square({ seed = "", colors, hot, className = "", style }: Props)
   );
 }
 
+// The MasterClass "shifting square": rings grow outward forever (infinite zoom).
+// Used for the Join button and every loading state.
+export function ShiftSquare({ seed = "", colors, className = "", label }: { seed?: string; colors?: [string, string, string, string]; className?: string; label?: string }) {
+  const [c0, c1, c2, c3] = colors || squareFor(seed);
+  return (
+    <span
+      className={`shift ${className}`}
+      style={{ "--c0": c0, "--c1": c1, "--c2": c2, "--c3": c3 } as CSSProperties}
+      role={label ? "status" : undefined}
+      aria-label={label}
+      aria-hidden={label ? undefined : true}
+    >
+      <i /><i /><i /><i />
+    </span>
+  );
+}
+
 // Same markup as a string, for MapLibre's DOM markers.
 export function squareHTML(seed: string): string {
   const [c0, c1, c2, c3] = squareFor(seed);

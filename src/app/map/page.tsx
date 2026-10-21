@@ -7,7 +7,7 @@ import type { GlobeHandle } from "@/components/Globe";
 import { Assistant, type AssistantHandle } from "@/components/Assistant";
 import { I } from "@/components/Icons";
 import { MemberDrawer } from "@/components/MemberDrawer";
-import { Square } from "@/components/Square";
+import { ShiftSquare, Square } from "@/components/Square";
 import { TopBar } from "@/components/TopBar";
 import { api, sb } from "@/lib/supabase-browser";
 import type { AssistantReply, Member } from "@/lib/types";
@@ -161,7 +161,7 @@ export default function MapPage() {
           />
         )}
 
-        {!loaded && <div className="loading-screen" style={{ position: "absolute" }}><Square seed="loading" className="pulse" /></div>}
+        {!loaded && <div className="loading-screen" style={{ position: "absolute" }}><ShiftSquare seed="loading" label="Loading the cohort" /></div>}
 
         <div className={`greeting ${panelOpen || selected ? "hide" : ""}`}>
           <span className="y">Hi {firstName || "there"},</span><br />

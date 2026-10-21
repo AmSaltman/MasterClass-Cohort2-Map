@@ -24,9 +24,48 @@ export function hash(str: string): number {
   return h >>> 0;
 }
 
-// Deterministic "random" square for a person, so it never changes between visits.
+// Every color used on the MasterClass subject cards.
+const COLORS = [...new Set(PALETTES.slice(0, 10).flat())];
+
+function luminance(hex: string) {
+  const n = parseInt(hex.slice(1), 16);
+  const [r, g, b] = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map((v) => {
+    const c = v / 255;
+    return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+  });
+  return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+}
+
+function contrast(a: string, b: string) {
+  const [x, y] = [luminance(a), luminance(b)].sort((p, q) => q - p);
+  return (x + 0.05) / (y + 0.05);
+}
+
+// Small seeded PRNG (mulberry32) so a person's colors are random but stable.
+function rng(seed: number) {
+  return () => {
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+// A randomly mixed square for each person: four colors drawn from the
+// MasterClass palette, each ring clearly distinct from the one around it.
+// Seeded by the member id, so it's the same on every visit and device.
 export function squareFor(id: string): [string, string, string, string] {
-  return PALETTES[hash(id) % PALETTES.length];
+  const rand = rng(hash(id));
+  const out: string[] = [];
+  for (let ring = 0; ring < 4; ring++) {
+    const prev = out[ring - 1];
+    let pick = COLORS[Math.floor(rand() * COLORS.length)];
+    for (let tries = 0; prev && tries < 40 && (out.includes(pick) || contrast(pick, prev) < 1.45); tries++) {
+      pick = COLORS[Math.floor(rand() * COLORS.length)];
+    }
+    out.push(pick);
+  }
+  return out as [string, string, string, string];
 }
 
 export function initials(name: string): string {

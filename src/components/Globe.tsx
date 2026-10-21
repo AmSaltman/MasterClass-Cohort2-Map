@@ -125,7 +125,7 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
       group.forEach((mem, i) => {
         seen.add(mem.id);
         const slot: [number, number] = [(i % cols) - (cols - 1) / 2, Math.floor(i / cols) - (rows - 1) / 2];
-        const tip = `<div class="tip">${mem.avatar_url && /^https:\/\//.test(mem.avatar_url) ? `<img src="${esc(mem.avatar_url)}" alt="">` : ""}<b>${esc(mem.full_name)}</b><span>${esc([mem.title, mem.company].filter(Boolean).join(" · ") || mem.city || "")}</span></div>`;
+        const tip = `<div class="tip">${mem.avatar_url && /^https:\/\//.test(mem.avatar_url) ? `<img src="${esc(mem.avatar_url)}" alt="">` : ""}<div class="tip-text"><b>${esc(mem.full_name)}</b><span>${esc([mem.title, mem.company].filter(Boolean).join(" · ") || mem.city || "")}</span></div></div>`;
         const existing = markers.current.get(mem.id);
         if (existing) {
           existing.marker.setLngLat(anchor);

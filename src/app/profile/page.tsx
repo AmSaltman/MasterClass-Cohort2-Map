@@ -3,7 +3,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Logo } from "@/components/TopBar";
 import { ProfileForm } from "@/components/ProfileForm";
-import { Square } from "@/components/Square";
+import { ShiftSquare } from "@/components/Square";
 import { api, sb } from "@/lib/supabase-browser";
 import { EMPTY_PROFILE, type ProfileInput } from "@/lib/types";
 
@@ -35,7 +35,7 @@ export default function ProfilePage() {
     })().catch(() => router.replace("/login"));
   }, [router]);
 
-  if (!initial) return <div className="loading-screen"><Square seed="loading" className="pulse" /></div>;
+  if (!initial) return <div className="loading-screen"><ShiftSquare seed="loading" label="Loading your profile" /></div>;
 
   return (
     <main className="page">
