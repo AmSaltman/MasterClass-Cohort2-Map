@@ -99,3 +99,11 @@ as $$
 $$;
 
 revoke all on function public.search_members from public, anon, authenticated;
+
+-- Profile pictures (added v2). Stored in a public bucket under an unguessable
+-- path; uploads go through /api/avatar (service role) only.
+alter table public.members add column if not exists avatar_url text;
+insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+values ('avatars', 'avatars', true, 2097152, array['image/jpeg', 'image/png', 'image/webp'])
+on conflict (id) do update set public = true, file_size_limit = 2097152,
+  allowed_mime_types = array['image/jpeg', 'image/png', 'image/webp'];

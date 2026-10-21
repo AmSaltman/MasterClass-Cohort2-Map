@@ -12,6 +12,8 @@ export default function ProfilePage() {
   const [initial, setInitial] = useState<ProfileInput | null>(null);
   const [isNew, setIsNew] = useState(false);
   const [firstName, setFirstName] = useState("");
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [uid, setUid] = useState("you");
 
   useEffect(() => {
     (async () => {
@@ -26,6 +28,8 @@ export default function ProfilePage() {
         }
       }
       setIsNew(!res.profile);
+      setAvatarUrl((res.profile?.avatar_url as string) || null);
+      setUid(data.session.user.id);
       setFirstName((base.full_name || "").split(" ")[0]);
       setInitial(base);
     })().catch(() => router.replace("/login"));
@@ -43,7 +47,7 @@ export default function ProfilePage() {
         </h1>
         <p>Every save is re-organized by our AI — industry, search tags, and a short summary — so the right people can find you.</p>
       </div>
-      <ProfileForm mode="edit" initial={initial} />
+      <ProfileForm mode="edit" initial={initial} avatarUrl={avatarUrl} seed={uid} />
     </main>
   );
 }

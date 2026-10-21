@@ -1,47 +1,48 @@
 "use client";
+import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useEffect, useState } from "react";
-import { Square } from "@/components/Square";
 import { I } from "@/components/Icons";
 import { sb } from "@/lib/supabase-browser";
 
-const TILES = Array.from({ length: 160 }, (_, i) => `tile-${i * 7919}`);
+const IntroGlobe = dynamic(() => import("@/components/IntroGlobe"), { ssr: false });
+
+// The MasterClass "shifting square": rings grow outward forever (infinite zoom).
+function ShiftSquare() {
+  return (
+    <span className="shift" aria-hidden>
+      <i /><i /><i /><i />
+    </span>
+  );
+}
 
 export default function Landing() {
-  const [hot, setHot] = useState<Set<number>>(new Set());
   const [signedIn, setSignedIn] = useState(false);
+  const [revealed, setRevealed] = useState(false);
 
   useEffect(() => {
     sb().auth.getSession().then(({ data }) => setSignedIn(!!data.session));
-    // A few tiles "breathe" at a time so the wall feels alive.
-    const t = setInterval(() => {
-      setHot(new Set(Array.from({ length: 6 }, () => Math.floor(Math.random() * TILES.length))));
-    }, 1600);
-    return () => clearInterval(t);
+    // Fallback in case the map can't load (e.g. WebGL off): reveal anyway.
+    const t = setTimeout(() => setRevealed(true), 2600);
+    return () => clearTimeout(t);
   }, []);
 
   return (
-    <main className="landing">
-      <div className="mosaic" aria-hidden>
-        {TILES.map((seed, i) => (
-          <div key={seed} className="tile sq-host">
-            <Square seed={seed} hot={hot.has(i)} />
-          </div>
-        ))}
-      </div>
+    <main className={`landing grid-bg ${revealed ? "revealed" : ""}`}>
+      <IntroGlobe onPlotted={() => setRevealed(true)} />
       <div className="landing-shade" />
       <section className="landing-center">
-        <p className="eyebrow">Welcome to the Fall &rsquo;26 Cohort</p>
-        <h1 className="landing-title logo">
-          <span className="mc">MasterClass</span> <span className="ex">Executive</span>
+        <p className="eyebrow reveal r1">Welcome to the Fall &rsquo;26 Cohort</p>
+        <h1 className="landing-title logo reveal r2">
+          <span className="mc">MasterClass</span> <span className="ex">Executive</span> <span className="mp">Map</span>
         </h1>
-        <p className="landing-sub">
-          The cohort map. Find classmates by city, industry, or what they&rsquo;re building &mdash; and reach them in one tap.
+        <p className="landing-sub reveal r3">
+          Find classmates by city, industry, or what they&rsquo;re building &mdash; and reach them in one tap.
         </p>
-        <div className="landing-actions">
-          <Link href={signedIn ? "/map" : "/join"} className="round-cta">
-            <span className="circle"><I.arrow /></span>
-            {signedIn ? "Open the map" : "Get Started"}
+        <div className="landing-actions reveal r4">
+          <Link href={signedIn ? "/map" : "/join"} className="join-btn">
+            <ShiftSquare />
+            <span className="join-label">{signedIn ? "Open the Map" : "Join the Map"} <I.arrow width={16} height={16} /></span>
           </Link>
           {!signedIn && (
             <p className="signin">Already joined? <Link href="/login">Sign in</Link></p>

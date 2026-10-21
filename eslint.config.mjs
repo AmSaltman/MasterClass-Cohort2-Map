@@ -6,6 +6,10 @@ const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
   // Override default ignores of eslint-config-next.
+  {
+    // Avatars are resized to 512px client-side before upload; next/image adds nothing.
+    rules: { "@next/next/no-img-element": "off" },
+  },
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",

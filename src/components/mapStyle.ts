@@ -34,15 +34,8 @@ export const mapStyle: StyleSpecification = {
   version: 8,
   projection: { type: "globe" },
   glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
-  sky: {
-    "sky-color": C.space,
-    "horizon-color": "#2a2a2a",
-    "fog-color": C.space,
-    "sky-horizon-blend": 0.6,
-    "horizon-fog-blend": 0.6,
-    "fog-ground-blend": 0.8,
-    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.55, 4, 0.2, 6, 0],
-  },
+  // Space around the globe is left transparent so the page grid shows behind it.
+  sky: { "atmosphere-blend": 0 },
   sources: {
     omt: { type: "vector", url: "https://tiles.openfreemap.org/planet" },
     graticule: { type: "geojson", data: graticule() },

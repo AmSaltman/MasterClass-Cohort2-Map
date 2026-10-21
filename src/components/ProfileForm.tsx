@@ -2,9 +2,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
+import { AvatarPicker, type AvatarChange } from "./AvatarPicker";
 import { CityInput } from "./CityInput";
 import { Square } from "./Square";
-import { api, sb } from "@/lib/supabase-browser";
+import { api, sb, uploadAvatar } from "@/lib/supabase-browser";
 import type { ProfileInput } from "@/lib/types";
 
 type AiResult = { industry: string | null; tags: string[]; summary: string | null; located: boolean };
@@ -32,7 +33,7 @@ function Section({ num, title, text, children }: { num: string; title: string; t
   );
 }
 
-export function ProfileForm({ mode, initial }: { mode: "join" | "edit"; initial: ProfileInput }) {
+export function ProfileForm({ mode, initial, avatarUrl = null, seed = "you" }: { mode: "join" | "edit"; initial: ProfileInput; avatarUrl?: string | null; seed?: string }) {
   const router = useRouter();
   const [p, setP] = useState<ProfileInput>(initial);
   const [password, setPassword] = useState("");
@@ -40,6 +41,7 @@ export function ProfileForm({ mode, initial }: { mode: "join" | "edit"; initial:
   const [error, setError] = useState<ReactNode>(null);
   const [stage, setStage] = useState<string | null>(null);
   const [ai, setAi] = useState<AiResult | null>(null);
+  const [avatar, setAvatar] = useState<AvatarChange>({ blob: null, remove: false });
 
   const set = <K extends keyof ProfileInput>(k: K, v: ProfileInput[K]) => setP((prev) => ({ ...prev, [k]: v }));
   const text = (k: keyof ProfileInput) => ({
@@ -74,6 +76,12 @@ export function ProfileForm({ mode, initial }: { mode: "join" | "edit"; initial:
       setStage("Our AI is organizing your profile");
       const out = await api<{ ai: AiResult }>("/api/profile", { method: "POST", body: JSON.stringify(p) });
       setAi(out.ai);
+      if (avatar.blob) {
+        setStage("Uploading your photo");
+        try { await uploadAvatar(avatar.blob); } catch (e) { console.error(e); /* profile saved; photo can be retried */ }
+      } else if (avatar.remove) {
+        await api("/api/avatar", { method: "DELETE" }).catch(() => {});
+      }
       setStage("Placing you on the map");
       setTimeout(() => router.push("/map"), 2200);
     } catch (err) {
@@ -96,6 +104,10 @@ export function ProfileForm({ mode, initial }: { mode: "join" | "edit"; initial:
   return (
     <form onSubmit={submit} className="form-wrap">
       <Section num="01" title={mode === "join" ? "Your account" : "You"} text={mode === "join" ? "Use the cohort access code from your program team." : "How classmates will see your name."}>
+        <div className="field full">
+          <span className="label">Profile picture</span>
+          <AvatarPicker seed={seed} current={avatarUrl} onChange={setAvatar} />
+        </div>
         <Field label="Full name" htmlFor="full_name"><input {...text("full_name")} required autoComplete="name" /></Field>
         <Field label="Email" htmlFor="email" hint={mode === "join" ? "You'll sign in with this." : "Shown to classmates if you allow it below."}>
           <input {...text("email")} type="email" required autoComplete="email" />

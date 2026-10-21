@@ -29,7 +29,7 @@ export function demoMembers(n = 140): Member[] {
       looking_for: "Partners and intros", can_help_with: "Scaling teams, go-to-market",
       linkedin: "linkedin.com/in/demo", instagram: "@demo", facebook: "demo", x: "@demo", tiktok: null,
       youtube: null, website: "example.com", whatsapp: "+12065550100",
-      tags: [ind.toLowerCase(), "founder", "growth"], ai_summary: `${name} runs a ${ind.toLowerCase()} company based in ${c[0]}.`,
+      tags: [ind.toLowerCase(), "founder", "growth"], avatar_url: null, ai_summary: `${name} runs a ${ind.toLowerCase()} company based in ${c[0]}.`,
     };
   });
 }

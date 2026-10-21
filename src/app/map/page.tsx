@@ -145,6 +145,7 @@ export default function MapPage() {
     <div className="map-page">
       <TopBar
         name={me?.full_name}
+        photo={me?.avatar_url}
         members={members.length}
         countries={countries}
         onGlobe={() => { setPanelOpen(false); globe.current?.reset(); }}
@@ -152,8 +153,13 @@ export default function MapPage() {
         onSignOut={signOut}
       />
       <div className={`map-stage ${selected ? "drawer-open" : ""}`}>
-        <Globe handleRef={globe} members={members} matchIds={matchIds} selectedId={selectedId} meId={meId} onSelect={select} />
         <div className="grid-overlay grid-bg" />
+        {loaded && (
+          <Globe
+            handleRef={globe} members={members} matchIds={matchIds} selectedId={selectedId} meId={meId} onSelect={select}
+            home={me && me.lat !== null && me.lng !== null ? [me.lng, me.lat] : null}
+          />
+        )}
 
         {!loaded && <div className="loading-screen" style={{ position: "absolute" }}><Square seed="loading" className="pulse" /></div>}
 
@@ -200,6 +206,16 @@ export default function MapPage() {
             </div>
             <button className="icon-btn" onClick={() => setPanelOpen(false)} aria-label="Close directory"><I.close /></button>
           </div>
+          <div className="panel-search">
+            <I.search width={16} height={16} />
+            <input
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setAi(null); }}
+              placeholder="Search the directory…"
+              aria-label="Search the directory"
+            />
+            {query && <button onClick={() => setQuery("")} aria-label="Clear search"><I.close width={14} height={14} /></button>}
+          </div>
           <div className="panel-body">
             {listed.length === 0 && (
               <div className="empty">
@@ -209,7 +225,14 @@ export default function MapPage() {
             )}
             {listed.map((m) => (
               <button key={m.id} className="person sq-host" onClick={() => { select(m.id); locate(m); }}>
-                <Square seed={m.id} />
+                <span className="thumb">
+                  {m.avatar_url ? (
+                    <>
+                      <img className="photo" src={m.avatar_url} alt="" loading="lazy" />
+                      <span className="tag"><Square seed={m.id} /></span>
+                    </>
+                  ) : <Square seed={m.id} />}
+                </span>
                 <div style={{ minWidth: 0 }}>
                   <b>{m.full_name}{m.id === meId ? " (you)" : ""}</b>
                   <div className="meta">{[m.title, m.company].filter(Boolean).join(" · ")}</div>

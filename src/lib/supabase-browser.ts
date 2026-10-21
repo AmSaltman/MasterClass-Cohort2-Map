@@ -15,6 +15,20 @@ export function sb(): SupabaseClient {
   return client;
 }
 
+export async function uploadAvatar(blob: Blob): Promise<string> {
+  const { data } = await sb().auth.getSession();
+  const body = new FormData();
+  body.append("file", blob, "avatar.jpg");
+  const res = await fetch("/api/avatar", {
+    method: "POST",
+    body,
+    headers: data.session ? { Authorization: `Bearer ${data.session.access_token}` } : {},
+  });
+  const out = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(out.error || "Photo upload failed.");
+  return out.url;
+}
+
 // fetch() wrapper that sends the signed-in user's access token to our API.
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {
   const { data } = await sb().auth.getSession();

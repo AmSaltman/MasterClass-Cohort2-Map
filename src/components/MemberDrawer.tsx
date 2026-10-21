@@ -80,8 +80,9 @@ export function MemberDrawer({
     <aside className={`drawer ${m ? "open" : ""}`} aria-hidden={!m} aria-label="Member profile">
       {m && (
         <div className="drawer-scroll">
-          <div className="drawer-art sq-host">
+          <div className={`drawer-art sq-host ${m.avatar_url ? "with-photo" : ""}`}>
             <Square seed={m.id} hot />
+            {m.avatar_url && <img className="drawer-portrait photo" src={m.avatar_url} alt={`${m.full_name}`} />}
             <button className="drawer-close" onClick={onClose} aria-label="Close profile"><I.close /></button>
           </div>
           <div className="drawer-main">

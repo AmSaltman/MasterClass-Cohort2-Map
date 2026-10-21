@@ -48,7 +48,7 @@ export function rateLimit(key: string, max: number, windowMs: number) {
 
 // Columns safe to send to other members (email/phone handled separately).
 export const PUBLIC_COLUMNS =
-  "id,full_name,email,phone,show_email,show_phone,city,region,country,lat,lng,company,title,industry,ai_industry,bio,looking_for,can_help_with,linkedin,instagram,facebook,x,tiktok,youtube,website,whatsapp,tags,ai_summary";
+  "id,full_name,email,phone,show_email,show_phone,city,region,country,lat,lng,company,title,industry,ai_industry,bio,looking_for,can_help_with,linkedin,instagram,facebook,x,tiktok,youtube,website,whatsapp,tags,ai_summary,avatar_url";
 
 type Row = Record<string, unknown> & { show_email?: boolean; show_phone?: boolean };
 

@@ -5,9 +5,10 @@ import { initials } from "@/lib/squares";
 
 export function Logo({ href = "/" }: { href?: string }) {
   return (
-    <Link href={href} className="logo" aria-label="MasterClass Executive — home">
+    <Link href={href} className="logo" aria-label="MasterClass Executive Map — home">
       <span className="mc">MasterClass</span>
       <span className="ex">Executive</span>
+      <span className="mp">Map</span>
     </Link>
   );
 }
@@ -28,6 +29,7 @@ function Meter({ label, value, steps }: { label: string; value: number; steps: n
 
 type Props = {
   name?: string;
+  photo?: string | null;
   members?: number;
   countries?: number;
   onDirectory?: () => void;
@@ -35,7 +37,7 @@ type Props = {
   onSignOut?: () => void;
 };
 
-export function TopBar({ name, members, countries, onDirectory, onGlobe, onSignOut }: Props) {
+export function TopBar({ name, photo, members, countries, onDirectory, onGlobe, onSignOut }: Props) {
   return (
     <header className="topbar">
       <Logo href="/map" />
@@ -50,7 +52,11 @@ export function TopBar({ name, members, countries, onDirectory, onGlobe, onSignO
         {onDirectory && <button className="icon-btn" onClick={onDirectory} aria-label="Open directory" title="Directory"><I.book /></button>}
         <Link className="icon-btn optional" href="/profile" aria-label="Edit my profile" title="My profile"><I.user /></Link>
         {onSignOut && <button className="icon-btn optional" onClick={onSignOut} aria-label="Sign out" title="Sign out"><I.logout /></button>}
-        {name && <Link className="avatar" href="/profile" title="My profile">{initials(name) || "ME"}</Link>}
+        {name && (
+          <Link className={`avatar ${photo ? "has-photo" : ""}`} href="/profile" title="My profile">
+            {photo ? <img className="photo" src={photo} alt="" /> : initials(name) || "ME"}
+          </Link>
+        )}
       </nav>
     </header>
   );

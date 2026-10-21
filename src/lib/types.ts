@@ -26,6 +26,7 @@ export type Member = {
   whatsapp: string | null;
   tags: string[];
   ai_summary: string | null;
+  avatar_url: string | null;
 };
 
 // What a member can edit about themselves.

@@ -99,7 +99,10 @@ export async function POST(req: Request) {
 export async function DELETE(req: Request) {
   try {
     const user = await requireUser(req);
-    const { error } = await adminClient().auth.admin.deleteUser(user.id);
+    const db = adminClient();
+    const { data: files } = await db.storage.from("avatars").list(user.id);
+    if (files?.length) await db.storage.from("avatars").remove(files.map((f) => `${user.id}/${f.name}`));
+    const { error } = await db.auth.admin.deleteUser(user.id);
     if (error) throw error;
     return Response.json({ ok: true });
   } catch (err) {

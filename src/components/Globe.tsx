@@ -19,6 +19,7 @@ type Props = {
   selectedId: string | null;
   meId: string | null;
   onSelect: (id: string) => void;
+  home: [number, number] | null; // [lng, lat] to open on; defaults to the US
   handleRef: Ref<GlobeHandle>; // plain prop so it survives next/dynamic
 };
 
@@ -26,7 +27,7 @@ type Props = {
 // rewrite MapLibre's own worker URL.
 setWorkerUrl("/maplibre-gl-worker.mjs");
 
-const HOME_CENTER: [number, number] = [-30, 28];
+const US_CENTER: [number, number] = [-98, 38];
 const GAP = 3;
 
 // Zoom where the globe fills ~80% of the stage height.
@@ -54,11 +55,13 @@ function groupKey(m: Member) {
   return city ? `${city}|${country}` : `${Math.round(m.lat! * 4) / 4}|${Math.round(m.lng! * 4) / 4}`;
 }
 
-export default function Globe({ members, matchIds, selectedId, meId, onSelect, handleRef }: Props) {
+export default function Globe({ members, matchIds, selectedId, meId, onSelect, home, handleRef }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const markers = useRef(new Map<string, Entry>());
   const size = useRef(16);
+  const homeRef = useRef<[number, number]>(home || US_CENTER);
+  const homeZoomFor = () => homeZoom(box.current?.clientHeight || 800) + 0.35;
   const selectRef = useRef(onSelect);
   useEffect(() => { selectRef.current = onSelect; }, [onSelect]);
 
@@ -70,8 +73,8 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
     const m = new MLMap({
       container: box.current,
       style: mapStyle,
-      center: HOME_CENTER,
-      zoom: homeZoom(box.current.clientHeight),
+      center: homeRef.current,
+      zoom: homeZoom(box.current.clientHeight) + 0.35,
       minZoom: 0.8,
       maxZoom: 13,
       renderWorldCopies: false,
@@ -122,7 +125,7 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
       group.forEach((mem, i) => {
         seen.add(mem.id);
         const slot: [number, number] = [(i % cols) - (cols - 1) / 2, Math.floor(i / cols) - (rows - 1) / 2];
-        const tip = `<div class="tip"><b>${esc(mem.full_name)}</b><span>${esc([mem.title, mem.company].filter(Boolean).join(" · ") || mem.city || "")}</span></div>`;
+        const tip = `<div class="tip">${mem.avatar_url && /^https:\/\//.test(mem.avatar_url) ? `<img src="${esc(mem.avatar_url)}" alt="">` : ""}<b>${esc(mem.full_name)}</b><span>${esc([mem.title, mem.company].filter(Boolean).join(" · ") || mem.city || "")}</span></div>`;
         const existing = markers.current.get(mem.id);
         if (existing) {
           existing.marker.setLngLat(anchor);
@@ -165,7 +168,7 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
   useImperativeHandle(handleRef, () => ({
     zoomIn: () => map.current?.zoomIn({ duration: 400 }),
     zoomOut: () => map.current?.zoomOut({ duration: 400 }),
-    reset: () => map.current?.flyTo({ center: HOME_CENTER, zoom: homeZoom(box.current?.clientHeight || 800), duration: 1400 }),
+    reset: () => map.current?.flyTo({ center: homeRef.current, zoom: homeZoomFor(), duration: 1400 }),
     flyTo: (lat, lng, zoom = 5) => map.current?.flyTo({ center: [lng, lat], zoom, duration: 1800, essential: true }),
     fitMembers: (ids) => {
       const m = map.current;
