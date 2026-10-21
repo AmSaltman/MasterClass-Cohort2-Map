@@ -29,14 +29,6 @@ export function squareFor(id: string): [string, string, string, string] {
   return PALETTES[hash(id) % PALETTES.length];
 }
 
-// Small stable offset (~±6km) so people in the same city don't stack exactly.
-export function jitter(id: string): [number, number] {
-  const h = hash(id + "j");
-  const a = ((h & 0xffff) / 0xffff - 0.5) * 0.11;
-  const b = (((h >>> 16) & 0xffff) / 0xffff - 0.5) * 0.11;
-  return [a, b];
-}
-
 export function initials(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
   return ((parts[0]?.[0] || "") + (parts.length > 1 ? parts[parts.length - 1][0] : "")).toUpperCase();

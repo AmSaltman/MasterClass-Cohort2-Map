@@ -1,0 +1,37 @@
+import type { SVGProps } from "react";
+
+const base = (p: SVGProps<SVGSVGElement>) => ({
+  width: 18, height: 18, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor",
+  strokeWidth: 1.6, strokeLinecap: "round" as const, strokeLinejoin: "round" as const, ...p,
+});
+
+export const I = {
+  search: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><circle cx="11" cy="11" r="6.5" /><path d="m20 20-4.2-4.2" /></svg>,
+  plus: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M12 5v14M5 12h14" /></svg>,
+  minus: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M5 12h14" /></svg>,
+  globe: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><circle cx="12" cy="12" r="8.5" /><path d="M3.5 12h17M12 3.5c2.5 2.6 3.6 5.4 3.6 8.5s-1.1 5.9-3.6 8.5c-2.5-2.6-3.6-5.4-3.6-8.5s1.1-5.9 3.6-8.5Z" /></svg>,
+  close: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M6 6l12 12M18 6 6 18" /></svg>,
+  arrow: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M5 12h14M13 6l6 6-6 6" /></svg>,
+  send: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M5 12h13M12 5l7 7-7 7" /></svg>,
+  list: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M4 6h16M4 12h16M4 18h16" /></svg>,
+  book: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M12 6.5C10 5 7.5 4.5 4 4.5v13c3.5 0 6 .5 8 2 2-1.5 4.5-2 8-2v-13c-3.5 0-6 .5-8 2Zm0 0v13" /></svg>,
+  user: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><circle cx="12" cy="8" r="3.5" /><path d="M5 20c.8-3.6 3.6-5.5 7-5.5s6.2 1.9 7 5.5" /></svg>,
+  users: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><circle cx="9" cy="8" r="3.2" /><path d="M3 19c.6-3.2 3-5 6-5s5.4 1.8 6 5M15.5 4.9a3.2 3.2 0 0 1 0 6.2M17.5 14.3c1.8.6 3 2.1 3.5 4.7" /></svg>,
+  mail: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><rect x="3.5" y="5.5" width="17" height="13" /><path d="m4 6.5 8 6 8-6" /></svg>,
+  phone: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M6.5 3.5h3l1.5 4-2 1.5a10 10 0 0 0 6 6l1.5-2 4 1.5v3a2 2 0 0 1-2 2A16 16 0 0 1 4.5 5.5a2 2 0 0 1 2-2Z" /></svg>,
+  sms: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M4 5h16v11H9l-5 4V5Z" /></svg>,
+  whatsapp: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M4 20l1.3-4A8 8 0 1 1 8 18.8L4 20Z" /><path d="M9 9.5c.3 2 2.5 4.2 4.5 4.5l1-1.2 1.8.8c-.2 1-1 1.7-2 1.7C11 15.3 8.7 13 8.7 9.7c0-1 .7-1.8 1.7-2l.8 1.8-1.2 1" /></svg>,
+  linkedin: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><rect x="3.5" y="3.5" width="17" height="17" /><path d="M8 10.5V17M8 7.5v.01M11.5 17v-6.5M11.5 13.5c0-1.7 1-3 2.6-3 1.5 0 2.4 1 2.4 2.8V17" /></svg>,
+  instagram: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><rect x="3.5" y="3.5" width="17" height="17" rx="4.5" /><circle cx="12" cy="12" r="3.8" /><path d="M17 7v.01" /></svg>,
+  facebook: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M14 20.5V13h2.6l.4-3H14V8.3c0-.9.3-1.5 1.6-1.5H17V4.1c-.3 0-1.2-.1-2.3-.1-2.3 0-3.7 1.4-3.7 3.9V10H8.5v3H11v7.5" /></svg>,
+  x: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M4.5 4.5 19.5 19.5M19.5 4.5l-6.2 6.6M10.7 13.4 4.5 19.5" /></svg>,
+  tiktok: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M14 4v10.5a3.5 3.5 0 1 1-3.5-3.5M14 4c.4 2.4 2 4 4.5 4.3" /></svg>,
+  youtube: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><rect x="3" y="6" width="18" height="12" rx="3" /><path d="m10.5 9.5 4 2.5-4 2.5v-5Z" /></svg>,
+  link: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1" /></svg>,
+  download: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M12 4v11m-5-5 5 5 5-5M5 20h14" /></svg>,
+  sparkle: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M12 3.5c.6 4.4 2.1 5.9 6.5 6.5-4.4.6-5.9 2.1-6.5 6.5-.6-4.4-2.1-5.9-6.5-6.5 4.4-.6 5.9-2.1 6.5-6.5ZM18.5 15.5c.3 1.9.9 2.6 2.5 3-1.6.4-2.2 1.1-2.5 3-.3-1.9-.9-2.6-2.5-3 1.6-.4 2.2-1.1 2.5-3Z" /></svg>,
+  copy: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><rect x="8.5" y="8.5" width="11" height="11" /><path d="M15.5 8.5v-4h-11v11h4" /></svg>,
+  pin: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M12 21s6.5-6 6.5-11a6.5 6.5 0 0 0-13 0c0 5 6.5 11 6.5 11Z" /><circle cx="12" cy="10" r="2.3" /></svg>,
+  logout: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M14 4.5H5.5v15H14M10 12h10m-3.5-3.5L20 12l-3.5 3.5" /></svg>,
+  target: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><circle cx="12" cy="12" r="7.5" /><circle cx="12" cy="12" r="2.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>,
+};

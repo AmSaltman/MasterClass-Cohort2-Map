@@ -1,3 +1,4 @@
+import { connection } from "next/server";
 import { z } from "zod";
 import { adminClient, errorResponse, HttpError, rateLimit, requireUser } from "@/lib/server";
 import { buildSearchText, embed, enrichProfile } from "@/lib/gemini";
@@ -33,6 +34,7 @@ const Profile = z.object({
 });
 
 export async function GET(req: Request) {
+  await connection(); // per-user data: never prerender
   try {
     const user = await requireUser(req);
     const { data, error } = await adminClient()

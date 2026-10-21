@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 
 export const viewport: Viewport = { themeColor: "#1c1c1c", width: "device-width", initialScale: 1 };
 
-export default function RootLayout({ children }: LayoutProps<"/">) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en" className={`${sans.variable} ${serif.variable}`}>
       <body>{children}</body>

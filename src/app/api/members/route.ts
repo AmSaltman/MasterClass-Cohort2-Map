@@ -1,7 +1,9 @@
+import { connection } from "next/server";
 import { adminClient, errorResponse, PUBLIC_COLUMNS, requireUser, toPublic } from "@/lib/server";
 
 // The whole cohort for signed-in members, with hidden emails/phones removed.
 export async function GET(req: Request) {
+  await connection(); // per-user data: never prerender
   try {
     const user = await requireUser(req);
     const { data, error } = await adminClient()
