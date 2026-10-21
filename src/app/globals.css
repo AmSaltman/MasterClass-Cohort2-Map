@@ -167,7 +167,10 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 .processing p { color: var(--muted); margin-top: 6px; }
 
 /* ───────── Map page ───────── */
-.map-page { position: fixed; inset: 0; display: flex; flex-direction: column; background: var(--bg); }
+/* Sized to the *visible* viewport (dvh) so mobile browser bars never cover the header or dock. */
+.map-page { position: fixed; top: 0; left: 0; right: 0; height: 100vh; height: 100dvh; display: flex; flex-direction: column; background: var(--bg); overflow: hidden; overscroll-behavior: none; padding-top: env(safe-area-inset-top); }
+.panel-body, .drawer-scroll, .ai-msgs, .industry-list { overscroll-behavior: contain; -webkit-overflow-scrolling: touch; }
+html.lock, html.lock body { overflow: hidden; height: 100%; overscroll-behavior: none; }
 .map-stage { position: relative; flex: 1; overflow: hidden; }
 .map { position: absolute; inset: 0; }
 .map .maplibregl-canvas { outline: none; }
@@ -222,7 +225,7 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 .zoomctl button:last-child { border-bottom: 0; }
 .zoomctl button:hover { background: rgba(255,255,255,0.08); }
 
-.dock { position: absolute; z-index: 7; left: 50%; bottom: 26px; transform: translateX(-50%); display: flex; gap: 4px; padding: 6px; background: rgba(48, 48, 48, 0.82); border: 1px solid var(--line-2); border-radius: 14px; backdrop-filter: blur(16px); }
+.dock { position: absolute; z-index: 7; left: 50%; bottom: calc(26px + env(safe-area-inset-bottom)); transform: translateX(-50%); display: flex; gap: 4px; padding: 6px; background: rgba(48, 48, 48, 0.82); border: 1px solid var(--line-2); border-radius: 14px; backdrop-filter: blur(16px); }
 .dock button, .dock a { height: 38px; padding: 0 16px; border-radius: 9px; font-weight: 600; font-size: 15px; color: rgba(245, 242, 234, 0.45); text-decoration: none; display: flex; align-items: center; transition: color 0.2s; }
 .dock button:hover, .dock a:hover { color: rgba(245, 242, 234, 0.8); }
 .dock .on { color: var(--text); }
@@ -268,7 +271,7 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 .intro-box { border: 1px solid var(--yellow); padding: 14px; font-size: 14px; white-space: pre-wrap; background: rgba(242, 201, 76, 0.05); }
 
 /* AI assistant */
-.ai-fab { position: absolute; z-index: 10; right: clamp(16px, 3.5vw, 70px); bottom: 26px; width: 58px; height: 58px; display: grid; place-items: center; transition: transform 0.35s var(--ease); }
+.ai-fab { position: absolute; z-index: 10; right: clamp(16px, 3.5vw, 70px); bottom: calc(26px + env(safe-area-inset-bottom)); width: 58px; height: 58px; display: grid; place-items: center; transition: transform 0.35s var(--ease); }
 .ai-fab:hover { transform: translateY(-2px); }
 .ai-fab .sq { width: 58px; height: 58px; padding: 0; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
 .ai-fab .badge { position: absolute; top: -8px; right: -8px; background: var(--text); color: #141414; font-size: 10px; font-weight: 700; padding: 2px 6px; letter-spacing: 0.04em; }
@@ -315,9 +318,11 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
   .searchbar .ask span { display: none; }
   .filter-chips, .match-banner { top: 72px; }
   .filter-chips { flex-wrap: nowrap; overflow-x: auto; justify-content: flex-start; }
-  .dock { bottom: 18px; }
+  .dock { bottom: calc(14px + env(safe-area-inset-bottom)); }
+  .landing .landing-title { font-size: clamp(44px, 14vw, 72px); line-height: 1; gap: 0 0.22em; }
+  .landing-sub { font-size: 17px; }
   .dock button, .dock a { padding: 0 11px; font-size: 14px; }
-  .ai-fab { bottom: 84px; right: 16px; width: 50px; height: 50px; }
+  .ai-fab { bottom: calc(78px + env(safe-area-inset-bottom)); right: 16px; width: 50px; height: 50px; }
   .ai-fab .sq { width: 50px; height: 50px; }
   .ai-panel { right: 8px; left: 8px; width: auto; bottom: 8px; height: calc(100% - 16px); }
   .zoomctl { display: none; }
@@ -416,3 +421,7 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 .industry-list button.on { background: var(--text); color: #141414; }
 .industry-list b { font-weight: 600; color: var(--muted); font-variant-numeric: tabular-nums; }
 .industry-list button.on b { color: #141414; }
+
+/* Map entry: squares pop in as the globe sweeps to you. "backwards" fill so
+   hover/scale transforms work normally once the animation ends. */
+.mk.enter .sq { animation: plot 0.9s var(--ease) var(--d) backwards; }

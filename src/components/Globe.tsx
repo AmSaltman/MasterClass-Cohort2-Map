@@ -88,6 +88,8 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
   const size = useRef(16);
   const [styleReady, setStyleReady] = useState(false);
   const homeRef = useRef<[number, number]>(home || US_CENTER);
+  // Entry fly-in: plays once per browser session (skipped for reduced motion).
+  const entry = useRef<{ start: number } | null>(null);
   const homeZoomFor = () => homeZoom(box.current?.clientHeight || 800) + 0.35;
   const selectRef = useRef(onSelect);
   useEffect(() => { selectRef.current = onSelect; }, [onSelect]);
@@ -97,11 +99,17 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
   // Create the map once.
   useEffect(() => {
     if (!box.current) return;
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const play = !reduced && !sessionStorage.getItem("map-entry-played");
+    const [homeLng, homeLat] = homeRef.current;
+    const startLng = homeLng - 150;
+    if (play) entry.current = { start: startLng };
+    const finalZoom = homeZoom(box.current.clientHeight) + 0.35;
     const m = new MLMap({
       container: box.current,
       style: mapStyle,
-      center: homeRef.current,
-      zoom: homeZoom(box.current.clientHeight) + 0.35,
+      center: play ? [startLng, Math.max(-20, Math.min(40, homeLat - 10))] : homeRef.current,
+      zoom: play ? finalZoom - 0.7 : finalZoom,
       minZoom: 0.8,
       maxZoom: 13,
       renderWorldCopies: false,
@@ -117,6 +125,8 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
       m.addLayer({ id: "routes-base", type: "line", source: "routes", layout: { "line-cap": "round" }, paint: { "line-color": "#F2C94C", "line-width": 1.6, "line-opacity": 0.55 } });
       m.addLayer({ id: "routes-dash", type: "line", source: "routes", paint: { "line-color": "#F2C94C", "line-width": 3, "line-dasharray": DASHES[0] } });
       setStyleReady(true);
+      if (play) sessionStorage.setItem("map-entry-played", "1");
+      if (play) m.easeTo({ center: homeRef.current, zoom: finalZoom, duration: 3400, easing: (t) => 1 - Math.pow(1 - t, 3) });
     });
     const sizeUp = () => {
       const next = markerSize(m.getZoom());
@@ -141,6 +151,15 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
   useEffect(() => {
     const m = map.current;
     if (!m) return;
+    // During the entry fly-in, squares "plot" in the order the globe sweeps past them.
+    const intro = entry.current;
+    const order = new Map<string, number>();
+    if (intro) {
+      const spread = members.filter((x) => x.lng !== null).sort((a, b) => ((a.lng! - intro.start + 720) % 360) - ((b.lng! - intro.start + 720) % 360));
+      const step = Math.min(18, 2400 / Math.max(1, spread.length));
+      spread.forEach((x, k) => order.set(x.id, 350 + k * step));
+      entry.current = null;
+    }
     const groups = new Map<string, Member[]>();
     for (const mem of members) {
       if (mem.lat === null || mem.lng === null) continue;
@@ -171,6 +190,11 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
         }
         const el = document.createElement("div");
         el.className = "mk";
+        if (order.has(mem.id)) {
+          el.classList.add("enter");
+          el.style.setProperty("--d", `${order.get(mem.id)}ms`);
+          setTimeout(() => el.classList.remove("enter"), (order.get(mem.id) || 0) + 1200);
+        }
         el.innerHTML = squareHTML(mem.id) + tip;
         el.setAttribute("role", "button");
         el.setAttribute("tabindex", "0");

@@ -41,6 +41,13 @@ export default function MapPage() {
   const [showSaved, setShowSaved] = useState(false);
   const [demo, setDemo] = useState(false);
 
+  // Keep the page itself from scrolling under mobile browser bars while on the map.
+  useEffect(() => {
+    document.documentElement.classList.add("lock");
+    window.scrollTo(0, 0);
+    return () => document.documentElement.classList.remove("lock");
+  }, []);
+
   useEffect(() => {
     (async () => {
       if (process.env.NODE_ENV !== "production" && new URLSearchParams(window.location.search).has("demo")) {
@@ -352,7 +359,6 @@ export default function MapPage() {
           <button className={showSaved ? "on" : ""} onClick={openSaved}>
             Saved{saved.length > 0 && <span className="dock-count">{saved.length}</span>}
           </button>
-          <Link href="/profile">My Profile</Link>
         </nav>
 
         <Assistant ref={assistant} firstName={firstName} onResult={onAiResult} />

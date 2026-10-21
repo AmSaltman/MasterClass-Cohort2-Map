@@ -22,8 +22,10 @@ export function CityInput({
   const [active, setActive] = useState(0);
   const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const skip = useRef(false);
+  const typed = useRef(false); // don't search for a city that was just loaded from the profile
 
   useEffect(() => {
+    if (!typed.current) return;
     if (skip.current) { skip.current = false; return; }
     if (timer.current) clearTimeout(timer.current);
     const q = value.trim();
@@ -76,7 +78,7 @@ export function CityInput({
         role="combobox"
         aria-expanded={open && shown.length > 0}
         aria-controls="city-list"
-        onChange={(e) => onText(e.target.value)}
+        onChange={(e) => { typed.current = true; onText(e.target.value); }}
         onFocus={() => shown.length && setOpen(true)}
         onBlur={() => setTimeout(() => setOpen(false), 150)}
         onKeyDown={(e) => {
