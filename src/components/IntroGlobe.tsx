@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { Map as MLMap, Marker, setWorkerUrl } from "maplibre-gl";
+import type { StyleSpecification } from "maplibre-gl";
 import { mapStyle } from "./mapStyle";
 import { squareHTML } from "./Square";
 
@@ -29,6 +30,9 @@ const CITIES: [number, number][] = [
   [-81.7, 41.5], [-79.99, 40.4], [-78.6, 35.8], [-76.6, 39.3], [-72.7, 41.8], [-70.3, 43.7],
 ];
 
+// Same dark basemap, but with every label removed (no country/city names).
+const introStyle: StyleSpecification = { ...mapStyle, layers: mapStyle.layers.filter((l) => l.type !== "symbol") };
+
 const START: [number, number] = [-150, 22];
 const END: [number, number] = [-55, 30];
 
@@ -46,7 +50,7 @@ export default function IntroGlobe({ onPlotted }: { onPlotted?: () => void }) {
     const zoom = Math.min(Math.max(Math.log2((0.86 * h * Math.PI) / 512), 0.9), 3);
     const m = new MLMap({
       container: box.current,
-      style: mapStyle,
+      style: introStyle,
       center: reduced ? END : START,
       zoom: reduced ? zoom : zoom - 0.6,
       interactive: false,
