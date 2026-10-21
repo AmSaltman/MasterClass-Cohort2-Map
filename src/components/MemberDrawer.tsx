@@ -9,10 +9,12 @@ import { vcard } from "@/lib/social";
 import type { Member } from "@/lib/types";
 
 export function MemberDrawer({
-  member, isMe, onClose, onLocate,
+  member, isMe, onClose, onLocate, saved, onToggleSave,
 }: {
   member: Member | null;
   isMe: boolean;
+  saved: boolean;
+  onToggleSave: (id: string) => void;
   onClose: () => void;
   onLocate: (m: Member) => void;
 }) {
@@ -86,12 +88,19 @@ export function MemberDrawer({
               )}
             </div>
 
+            {!isMe && (
+              <button className={`btn ${saved ? "" : "ghost"} save-btn`} onClick={() => onToggleSave(m.id)} aria-pressed={saved}>
+                {saved ? <I.bookmarkFilled width={16} height={16} /> : <I.bookmark width={16} height={16} />}
+                {saved ? "Saved to my contacts" : "Save contact"}
+              </button>
+            )}
+
             <div className="kv">
               <span className="label">{isMe ? "How classmates reach you" : "Reach out"}</span>
               <ContactGrid
                 member={m}
                 message={intro}
-                extra={!isMe && <button className="contact" onClick={saveContact}><I.download />Save contact</button>}
+                extra={!isMe && <button className="contact" onClick={saveContact}><I.download />Add to phone</button>}
               />
               {isMe && (
                 <Link href="/profile" className="muted" style={{ fontSize: 13, textDecoration: "underline", marginTop: 4 }}>

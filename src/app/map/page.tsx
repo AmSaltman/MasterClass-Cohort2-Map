@@ -37,13 +37,17 @@ export default function MapPage() {
   const [ai, setAi] = useState<{ ids: string[]; label: string } | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [panelOpen, setPanelOpen] = useState(false);
+  const [saved, setSaved] = useState<string[]>([]);
+  const [showSaved, setShowSaved] = useState(false);
+  const [demo, setDemo] = useState(false);
 
   useEffect(() => {
     (async () => {
       if (process.env.NODE_ENV !== "production" && new URLSearchParams(window.location.search).has("demo")) {
         const { demoMembers } = await import("@/lib/demo");
         const all = demoMembers();
-        setMembers(all); setMeId(all[0].id); setLoaded(true);
+        setMembers(all); setMeId(all[0].id); setLoaded(true); setDemo(true);
+        setSaved([all[3].id, all[9].id, all[14].id, all[20].id]);
         return;
       }
       const { data } = await sb().auth.getSession();
@@ -52,6 +56,7 @@ export default function MapPage() {
       if (!res.hasProfile) return router.replace("/profile");
       setMembers(res.members);
       setMeId(res.me);
+      api<{ ids: string[] }>("/api/saved").then((r) => setSaved(r.ids)).catch(() => {});
       setLoaded(true);
     })().catch((e) => setLoadError(e instanceof Error ? e.message : "Couldn't load the cohort."));
   }, [router]);
@@ -76,13 +81,18 @@ export default function MapPage() {
       .map(([m]) => m);
   }, [index, query, industry]);
 
+  const savedMembers = useMemo(() => saved.map((id) => byId.get(id)).filter((m): m is Member => !!m), [saved, byId]);
+
   const matchIds = useMemo(() => {
+    if (showSaved) return new Set([...saved, ...(meId ? [meId] : [])]);
     if (ai) return new Set(ai.ids);
     if (localMatches) return new Set(localMatches.map((m) => m.id));
     return null;
-  }, [ai, localMatches]);
+  }, [ai, localMatches, showSaved, saved, meId]);
 
-  const listed: Member[] = ai
+  const listed: Member[] = showSaved
+    ? savedMembers
+    : ai
     ? ai.ids.map((id) => byId.get(id)).filter((m): m is Member => !!m)
     : localMatches || members;
 
@@ -97,7 +107,26 @@ export default function MapPage() {
   }, []);
 
   function clearAll() {
+    setAi(null); setQuery(""); setIndustry(null); setShowSaved(false);
+  }
+
+  function openSaved() {
     setAi(null); setQuery(""); setIndustry(null);
+    setShowSaved(true);
+    setPanelOpen(true);
+    const ids = [...saved, ...(meId ? [meId] : [])];
+    if (saved.length) setTimeout(() => globe.current?.fitMembers(ids), 50);
+  }
+
+  async function toggleSave(id: string) {
+    const isSaved = saved.includes(id);
+    setSaved((s) => (isSaved ? s.filter((x) => x !== id) : [...s, id]));
+    if (demo) return;
+    try {
+      await api("/api/saved", { method: isSaved ? "DELETE" : "POST", body: JSON.stringify({ id }) });
+    } catch {
+      setSaved((s) => (isSaved ? [...s, id] : s.filter((x) => x !== id))); // roll back
+    }
   }
 
   function submitSearch() {
@@ -163,6 +192,7 @@ export default function MapPage() {
           <Globe
             handleRef={globe} members={members} matchIds={matchIds} selectedId={selectedId} meId={meId} onSelect={select}
             home={me && me.lat !== null && me.lng !== null ? [me.lng, me.lat] : null}
+            routeIds={showSaved ? saved : null}
           />
         )}
 
@@ -177,7 +207,7 @@ export default function MapPage() {
           <I.search />
           <input
             value={query}
-            onChange={(e) => { setQuery(e.target.value); setAi(null); }}
+            onChange={(e) => { setQuery(e.target.value); setAi(null); setShowSaved(false); }}
             placeholder="Search name, company, industry, city…"
             aria-label="Search the cohort"
           />
@@ -187,7 +217,13 @@ export default function MapPage() {
           </button>
         </form>
 
-        {ai ? (
+        {showSaved ? (
+          <div className="match-banner" role="status">
+            <I.bookmarkFilled width={14} height={14} />
+            {saved.length} saved {saved.length === 1 ? "contact" : "contacts"}{me?.lat == null ? "" : " · flight paths from you"}
+            <button onClick={clearAll}>Clear</button>
+          </div>
+        ) : ai ? (
           <div className="match-banner" role="status">
             <I.sparkle width={14} height={14} />
             {ai.ids.length} {ai.ids.length === 1 ? "match" : "matches"} · “{ai.label.length > 42 ? ai.label.slice(0, 40) + "…" : ai.label}”
@@ -206,7 +242,7 @@ export default function MapPage() {
         <aside className={`panel ${panelOpen ? "open" : ""}`} aria-label="Cohort directory" aria-hidden={!panelOpen}>
           <div className="panel-head">
             <div>
-              <h3>{ai ? "AI matches" : localMatches ? "Search results" : "Directory"}</h3>
+              <h3>{showSaved ? "Saved contacts" : ai ? "AI matches" : localMatches ? "Search results" : "Directory"}</h3>
               <p>{listed.length} {listed.length === 1 ? "member" : "members"}{filtering ? " · lit up on the globe" : ""}</p>
             </div>
             <button className="icon-btn" onClick={() => setPanelOpen(false)} aria-label="Close directory"><I.close /></button>
@@ -222,7 +258,10 @@ export default function MapPage() {
             {query && <button onClick={() => setQuery("")} aria-label="Clear search"><I.close width={14} height={14} /></button>}
           </div>
           <div className="panel-body">
-            {listed.length === 0 && (
+            {showSaved && saved.length === 0 && (
+              <div className="empty">No saved contacts yet. Open anyone&rsquo;s profile and tap <b>Save contact</b> to add them here.</div>
+            )}
+            {!showSaved && listed.length === 0 && (
               <div className="empty">
                 No one matches that yet.{" "}
                 {query && <button style={{ textDecoration: "underline" }} onClick={() => assistant.current?.ask(query)}>Ask the AI instead</button>}
@@ -243,7 +282,7 @@ export default function MapPage() {
                   ) : <Square seed={m.id} />}
                 </span>
                 <div style={{ minWidth: 0 }}>
-                  <b>{m.full_name}{m.id === meId ? " (you)" : ""}</b>
+                  <b>{m.full_name}{m.id === meId ? " (you)" : ""}{saved.includes(m.id) && <I.bookmarkFilled width={12} height={12} style={{ color: "var(--yellow)", marginLeft: 6, verticalAlign: "-1px" }} />}</b>
                   <div className="meta">{[m.title, m.company].filter(Boolean).join(" · ")}</div>
                   <div className="loc">{[industriesOf(m).join(" · "), [m.city, m.country].filter(Boolean).join(", ")].filter(Boolean).join(" — ")}</div>
                   <QuickContacts member={m} />
@@ -253,7 +292,10 @@ export default function MapPage() {
           </div>
         </aside>
 
-        <MemberDrawer member={selected} isMe={selected?.id === meId} onClose={() => setSelectedId(null)} onLocate={locate} />
+        <MemberDrawer
+          member={selected} isMe={selected?.id === meId} onClose={() => setSelectedId(null)} onLocate={locate}
+          saved={!!selected && saved.includes(selected.id)} onToggleSave={toggleSave}
+        />
 
         <div className="zoomctl" aria-label="Map controls">
           <button onClick={() => globe.current?.zoomIn()} aria-label="Zoom in"><I.plus /></button>
@@ -263,8 +305,11 @@ export default function MapPage() {
         </div>
 
         <nav className="dock" aria-label="Views">
-          <button className={!panelOpen ? "on" : ""} onClick={() => { setPanelOpen(false); globe.current?.reset(); }}>Globe</button>
-          <button className={panelOpen ? "on" : ""} onClick={() => setPanelOpen(true)}>Directory</button>
+          <button className={!panelOpen ? "on" : ""} onClick={() => { setPanelOpen(false); setShowSaved(false); globe.current?.reset(); }}>Globe</button>
+          <button className={panelOpen && !showSaved ? "on" : ""} onClick={() => { setShowSaved(false); setPanelOpen(true); }}>Directory</button>
+          <button className={showSaved ? "on" : ""} onClick={openSaved}>
+            Saved{saved.length > 0 && <span className="dock-count">{saved.length}</span>}
+          </button>
           <Link href="/profile">My Profile</Link>
         </nav>
 

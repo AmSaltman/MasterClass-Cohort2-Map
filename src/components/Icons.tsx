@@ -33,5 +33,7 @@ export const I = {
   copy: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><rect x="8.5" y="8.5" width="11" height="11" /><path d="M15.5 8.5v-4h-11v11h4" /></svg>,
   pin: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M12 21s6.5-6 6.5-11a6.5 6.5 0 0 0-13 0c0 5 6.5 11 6.5 11Z" /><circle cx="12" cy="10" r="2.3" /></svg>,
   logout: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M14 4.5H5.5v15H14M10 12h10m-3.5-3.5L20 12l-3.5 3.5" /></svg>,
+  bookmark: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M6.5 3.5h11v17L12 16l-5.5 4.5v-17Z" /></svg>,
+  bookmarkFilled: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)} fill="currentColor"><path d="M6.5 3.5h11v17L12 16l-5.5 4.5v-17Z" /></svg>,
   target: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><circle cx="12" cy="12" r="7.5" /><circle cx="12" cy="12" r="2.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>,
 };

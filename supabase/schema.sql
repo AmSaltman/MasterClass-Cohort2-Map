@@ -114,3 +114,13 @@ alter table public.members add column if not exists industries text[] not null d
 update public.members
 set industries = array(select btrim(x) from unnest(string_to_array(industry, ',')) x where btrim(x) <> '')
 where cardinality(industries) = 0 and coalesce(industry, '') <> '';
+
+-- Personal saved contacts (added v4). Private to each member; server-only access.
+create table if not exists public.saved_contacts (
+  member_id  uuid not null references public.members(id) on delete cascade,
+  contact_id uuid not null references public.members(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (member_id, contact_id),
+  check (member_id <> contact_id)
+);
+alter table public.saved_contacts enable row level security;

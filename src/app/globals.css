@@ -397,3 +397,7 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 .chip-tag { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 10px; background: #2e2e2e; border: 1px solid var(--line-2); font-size: 13px; }
 .chip-tag button { color: var(--muted); display: grid; place-items: center; width: 18px; height: 18px; }
 .chip-tag button:hover { color: var(--text); }
+
+.dock-count { margin-left: 7px; min-width: 18px; height: 18px; padding: 0 5px; background: var(--yellow); color: #141414; font-size: 11px; font-weight: 700; display: inline-grid; place-items: center; }
+.save-btn { align-self: flex-start; }
+.btn.save-btn:not(.ghost) { background: var(--yellow); border-color: var(--yellow); }

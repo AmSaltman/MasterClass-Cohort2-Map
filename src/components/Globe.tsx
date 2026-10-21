@@ -1,6 +1,6 @@
 "use client";
-import { useEffect, useImperativeHandle, useRef, type Ref } from "react";
-import { LngLatBounds, Map as MLMap, Marker, setWorkerUrl } from "maplibre-gl";
+import { useEffect, useImperativeHandle, useRef, useState, type Ref } from "react";
+import { LngLatBounds, Map as MLMap, Marker, setWorkerUrl, type GeoJSONSource } from "maplibre-gl";
 import { mapStyle } from "./mapStyle";
 import { squareHTML } from "./Square";
 import type { Member } from "@/lib/types";
@@ -19,7 +19,8 @@ type Props = {
   selectedId: string | null;
   meId: string | null;
   onSelect: (id: string) => void;
-  home: [number, number] | null; // [lng, lat] to open on; defaults to the US
+  home: [number, number] | null;
+  routeIds: string[] | null; // draw flight paths from me to these members // [lng, lat] to open on; defaults to the US
   handleRef: Ref<GlobeHandle>; // plain prop so it survives next/dynamic
 };
 
@@ -46,6 +47,31 @@ function esc(s: string) {
   return s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[c]!);
 }
 
+// The great circle between two [lng, lat] points, split into segments
+// wherever it crosses the date line (so polar / Pacific routes draw cleanly).
+function greatCircle(a: [number, number], b: [number, number], steps = 96): [number, number][][] {
+  const rad = Math.PI / 180;
+  const toVec = ([lng, lat]: [number, number]) => [Math.cos(lat * rad) * Math.cos(lng * rad), Math.cos(lat * rad) * Math.sin(lng * rad), Math.sin(lat * rad)];
+  const [p, q] = [toVec(a), toVec(b)];
+  const omega = Math.acos(Math.min(1, Math.max(-1, p[0] * q[0] + p[1] * q[1] + p[2] * q[2])));
+  if (omega < 1e-6) return [[a, b]];
+  const segments: [number, number][][] = [[]];
+  let prev: number | null = null;
+  for (let i = 0; i <= steps; i++) {
+    const t = i / steps;
+    const s1 = Math.sin((1 - t) * omega) / Math.sin(omega), s2 = Math.sin(t * omega) / Math.sin(omega);
+    const [x, y, z] = [0, 1, 2].map((k) => s1 * p[k] + s2 * q[k]);
+    const lng = Math.atan2(y, x) / rad, lat = Math.atan2(z, Math.hypot(x, y)) / rad;
+    if (prev !== null && Math.abs(lng - prev) > 180) segments.push([]);
+    segments[segments.length - 1].push([lng, lat]);
+    prev = lng;
+  }
+  return segments.filter((seg) => seg.length > 1);
+}
+
+// Marching-ants dash sequence for the "in flight" effect.
+const DASHES = [[0, 4, 3], [0.5, 4, 2.5], [1, 4, 2], [1.5, 4, 1.5], [2, 4, 1], [2.5, 4, 0.5], [3, 4, 0], [0, 0.5, 3, 3.5], [0, 1, 3, 3], [0, 1.5, 3, 2.5], [0, 2, 3, 2], [0, 2.5, 3, 1.5], [0, 3, 3, 1], [0, 3.5, 3, 0.5]];
+
 type Entry = { marker: Marker; el: HTMLDivElement; lngLat: [number, number]; slot: [number, number] };
 
 // Members in the same city form a tidy mosaic of squares around the city point.
@@ -55,11 +81,12 @@ function groupKey(m: Member) {
   return city ? `${city}|${country}` : `${Math.round(m.lat! * 4) / 4}|${Math.round(m.lng! * 4) / 4}`;
 }
 
-export default function Globe({ members, matchIds, selectedId, meId, onSelect, home, handleRef }: Props) {
+export default function Globe({ members, matchIds, selectedId, meId, onSelect, home, routeIds, handleRef }: Props) {
   const box = useRef<HTMLDivElement>(null);
   const map = useRef<MLMap | null>(null);
   const markers = useRef(new Map<string, Entry>());
   const size = useRef(16);
+  const [styleReady, setStyleReady] = useState(false);
   const homeRef = useRef<[number, number]>(home || US_CENTER);
   const homeZoomFor = () => homeZoom(box.current?.clientHeight || 800) + 0.35;
   const selectRef = useRef(onSelect);
@@ -84,6 +111,13 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
       touchPitch: false,
     });
     m.touchZoomRotate.disableRotation();
+    m.on("load", () => {
+      m.addSource("routes", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      m.addLayer({ id: "routes-glow", type: "line", source: "routes", layout: { "line-cap": "round" }, paint: { "line-color": "#F2C94C", "line-width": 10, "line-opacity": 0.22, "line-blur": 5 } });
+      m.addLayer({ id: "routes-base", type: "line", source: "routes", layout: { "line-cap": "round" }, paint: { "line-color": "#F2C94C", "line-width": 1.6, "line-opacity": 0.55 } });
+      m.addLayer({ id: "routes-dash", type: "line", source: "routes", paint: { "line-color": "#F2C94C", "line-width": 3, "line-dasharray": DASHES[0] } });
+      setStyleReady(true);
+    });
     const sizeUp = () => {
       const next = markerSize(m.getZoom());
       if (next === size.current && box.current?.style.getPropertyValue("--mk")) return;
@@ -164,6 +198,32 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
       el.classList.toggle("me", id === meId);
     }
   }, [matchIds, selectedId, meId, members]);
+
+  // Flight paths from my city to each saved contact.
+  useEffect(() => {
+    const m = map.current;
+    if (!m || !styleReady) return;
+    const src = m.getSource("routes") as GeoJSONSource | undefined;
+    const from = meId ? markers.current.get(meId)?.lngLat : undefined;
+    const targets = (routeIds || []).map((id) => markers.current.get(id)?.lngLat).filter((p): p is [number, number] => !!p);
+    if (!src) return;
+    src.setData({
+      type: "FeatureCollection",
+      features: from ? targets.map((to) => ({ type: "Feature" as const, properties: {}, geometry: { type: "MultiLineString" as const, coordinates: greatCircle(from, to) } })) : [],
+    });
+    if (!from || !targets.length) return;
+    let step = 0, last = 0, raf = 0;
+    const tick = (t: number) => {
+      if (t - last > 60) {
+        step = (step + 1) % DASHES.length;
+        if (m.getLayer("routes-dash")) m.setPaintProperty("routes-dash", "line-dasharray", DASHES[step]);
+        last = t;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [routeIds, meId, members, styleReady]);
 
   useImperativeHandle(handleRef, () => ({
     zoomIn: () => map.current?.zoomIn({ duration: 400 }),
