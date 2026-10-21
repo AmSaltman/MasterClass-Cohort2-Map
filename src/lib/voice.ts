@@ -3,7 +3,7 @@ import { GoogleGenAI, Modality, type LiveServerMessage, type Session } from "@go
 import { api } from "./supabase-browser";
 
 export type VoiceState = "connecting" | "listening" | "thinking" | "speaking";
-export type VoiceEffect = { matchIds?: string[]; focus?: { lat: number; lng: number; zoom: number } };
+export type VoiceEffect = { matchIds?: string[]; focus?: { lat: number; lng: number; zoom: number }; select?: { ids: string[]; subject?: string; body?: string } };
 
 type Handlers = {
   onState: (s: VoiceState) => void;
@@ -150,7 +150,7 @@ export class VoiceSession {
           method: "POST",
           body: JSON.stringify({ name: c.name, args: c.args || {} }),
         });
-        if (r.effect.matchIds || r.effect.focus) this.h.onEffect(r.effect);
+        if (r.effect.matchIds || r.effect.focus || r.effect.select) this.h.onEffect(r.effect);
         return { id: c.id, name: c.name, response: r.output };
       } catch {
         return { id: c.id, name: c.name, response: { error: "tool failed" } };

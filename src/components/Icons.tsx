@@ -37,5 +37,6 @@ export const I = {
   bookmarkFilled: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)} fill="currentColor"><path d="M6.5 3.5h11v17L12 16l-5.5 4.5v-17Z" /></svg>,
   arrowUpRight: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M7 17 17 7M9 7h8v8" /></svg>,
   wave: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)} strokeWidth={2}><path d="M3 10.5v3M6.5 8v8M10 4.5v15M13.5 7v10M17 9.5v5M20.5 11v2" /></svg>,
+  check: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)} strokeWidth={2.4}><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>,
   target: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><circle cx="12" cy="12" r="7.5" /><circle cx="12" cy="12" r="2.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>,
 };

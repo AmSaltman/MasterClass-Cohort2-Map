@@ -75,4 +75,8 @@ export type AssistantReply = {
   reply: string;
   matchIds: string[] | null; // null = leave the map as it is
   focus: { lat: number; lng: number; zoom: number } | null;
+  // A group the AI selected for a group email, with an optional draft.
+  select?: GroupSelection | null;
 };
+
+export type GroupSelection = { ids: string[]; subject?: string; body?: string };

@@ -69,7 +69,7 @@ export function Assistant({
         });
       },
       onTurnComplete: settle,
-      onEffect: (e) => onResult({ reply: "", matchIds: e.matchIds ?? null, focus: e.focus ?? null }, lastSpoken.current.trim() || "Voice search"),
+      onEffect: (e) => onResult({ reply: "", matchIds: e.matchIds ?? null, focus: e.focus ?? null, select: e.select ?? null }, lastSpoken.current.trim() || "Voice search"),
       onEnd: (error) => {
         voiceRef.current = null;
         setVoice(null);

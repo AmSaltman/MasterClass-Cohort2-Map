@@ -49,6 +49,7 @@ export async function POST(req: Request) {
           const { output, effect } = await runTool(call, ctx);
           if (effect.matchIds) result.matchIds = effect.matchIds;
           if (effect.focus) result.focus = effect.focus;
+          if (effect.select) result.select = effect.select;
           return { functionResponse: { id: call.id, name: call.name, response: output } };
         }),
       );

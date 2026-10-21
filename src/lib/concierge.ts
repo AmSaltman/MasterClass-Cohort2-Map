@@ -51,6 +51,20 @@ export const TOOLS: FunctionDeclaration[] = [
       required: ["text"],
     },
   },
+  {
+    name: "select_members",
+    description:
+      "Select a group of members in the directory so the user can email them all at once (e.g. 'email everyone in Washington about a meetup', 'message all the education people'). Use after search_members. Include a short draft email in the user's voice when they've said what it's about.",
+    parametersJsonSchema: {
+      type: "object",
+      properties: {
+        member_ids: { type: "array", items: { type: "string" } },
+        email_subject: { type: "string", description: "Short subject line." },
+        email_body: { type: "string", description: "Friendly, concise email body (under 120 words), written as the user, signed with their first name. No placeholders like [Name]." },
+      },
+      required: ["member_ids"],
+    },
+  },
 ];
 
 export type Compact = Record<string, unknown>;
@@ -129,6 +143,7 @@ How to work:
 - Then call highlight_members with the ids of the people who are actually relevant (skip weak matches), and a focus point when location matters. If nobody matches, say so and call highlight_members with an empty list.
 - Reply briefly in plain text (no markdown tables or headers). Name the best few people with title/company/city and one line on why they fit. Mention how many are lit up on the map.
 - If the user gives feedback or a feature idea, call save_suggestion and thank them.
+- If the user wants to email, invite or message a group, find the people, call highlight_members, then call select_members with their ids and a draft. Tell them the group is selected in the directory, ready to review and send (members who hid their email are skipped).
 - Only use facts from tool results. Never invent members or contact details.
 - Refer to people by name; never guess gendered pronouns.
 
@@ -144,7 +159,11 @@ You are speaking out loud in a live voice conversation. Keep answers short and n
   return { userId, hasProfile: !!me, byId, system };
 }
 
-export type ToolEffect = { matchIds?: string[]; focus?: { lat: number; lng: number; zoom: number } };
+export type ToolEffect = {
+  matchIds?: string[];
+  focus?: { lat: number; lng: number; zoom: number };
+  select?: { ids: string[]; subject?: string; body?: string };
+};
 
 // Runs one concierge tool call. Never throws; errors become a tool result.
 export async function runTool(call: Pick<FunctionCall, "name" | "args">, ctx: ConciergeContext): Promise<{ output: Record<string, unknown>; effect: ToolEffect }> {
@@ -166,6 +185,15 @@ export async function runTool(call: Pick<FunctionCall, "name" | "args">, ctx: Co
         effect.focus = { lat, lng, zoom: Math.min(Math.max(zoom, 0.8), 12) };
       }
       return { output: { highlighted: ids.length }, effect };
+    }
+    if (call.name === "select_members") {
+      const ids = Array.isArray(args.member_ids)
+        ? [...new Set(args.member_ids.filter((id): id is string => typeof id === "string" && ctx.byId.has(id) && id !== ctx.userId))]
+        : [];
+      const str = (v: unknown, max: number) => (typeof v === "string" && v.trim() ? v.trim().slice(0, max) : undefined);
+      effect.select = { ids, subject: str(args.email_subject, 200), body: str(args.email_body, 2000) };
+      effect.matchIds = ids;
+      return { output: { selected: ids.length }, effect };
     }
     if (call.name === "save_suggestion") {
       const text = String(args.text || "").trim().slice(0, 4000);

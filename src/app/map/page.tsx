@@ -6,12 +6,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GlobeHandle } from "@/components/Globe";
 import { Assistant, type AssistantHandle } from "@/components/Assistant";
 import { QuickContacts } from "@/components/Contacts";
+import { GroupCompose } from "@/components/GroupCompose";
 import { I } from "@/components/Icons";
 import { MemberDrawer } from "@/components/MemberDrawer";
 import { ShiftSquare, Square } from "@/components/Square";
 import { TopBar } from "@/components/TopBar";
 import { api, sb } from "@/lib/supabase-browser";
-import type { AssistantReply, Member } from "@/lib/types";
+import type { AssistantReply, GroupSelection, Member } from "@/lib/types";
 
 const Globe = dynamic(() => import("@/components/Globe"), { ssr: false });
 
@@ -40,6 +41,12 @@ export default function MapPage() {
   const [saved, setSaved] = useState<string[]>([]);
   const [showSaved, setShowSaved] = useState(false);
   const [demo, setDemo] = useState(false);
+  // Bulk selection for group emails.
+  const [selectMode, setSelectMode] = useState(false);
+  const [picked, setPicked] = useState<Set<string>>(new Set());
+  const [composeOpen, setComposeOpen] = useState(false);
+  const [draft, setDraft] = useState<GroupSelection | null>(null);
+  const [composeKey, setComposeKey] = useState(0);
 
   // Keep the page itself from scrolling under mobile browser bars while on the map.
   useEffect(() => {
@@ -118,6 +125,14 @@ export default function MapPage() {
     : localMatches || members;
 
   const onAiResult = useCallback((r: AssistantReply, question: string) => {
+    if (r.select && r.select.ids.length) {
+      // The AI picked a group to email: select them and open the compose sheet with its draft.
+      setSelectMode(true);
+      setPicked(new Set(r.select.ids));
+      setDraft(r.select);
+      setComposeKey((k) => k + 1);
+      setComposeOpen(true);
+    }
     if (r.matchIds === null) return; // e.g. a saved suggestion — leave the map alone
     setQuery("");
     setIndustry(null);
@@ -126,6 +141,18 @@ export default function MapPage() {
     if (r.focus) globe.current?.flyTo(r.focus.lat, r.focus.lng, r.focus.zoom);
     else if (r.matchIds.length) globe.current?.fitMembers(r.matchIds);
   }, []);
+
+  function togglePick(id: string) {
+    setPicked((p) => {
+      const next = new Set(p);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  }
+
+  function exitSelect() {
+    setSelectMode(false); setPicked(new Set()); setComposeOpen(false); setDraft(null);
+  }
 
   function clearAll() {
     setAi(null); setQuery(""); setIndustry(null); setShowSaved(false);
@@ -294,7 +321,12 @@ export default function MapPage() {
               <h3>{showSaved ? "Saved contacts" : ai ? "AI matches" : localMatches ? "Search results" : "Directory"}</h3>
               <p>{listed.length} {listed.length === 1 ? "member" : "members"}{filtering ? " · lit up on the globe" : ""}</p>
             </div>
-            <button className="icon-btn" onClick={() => setPanelOpen(false)} aria-label="Close directory"><I.close /></button>
+            <div style={{ display: "flex", gap: 4, alignItems: "center" }}>
+              <button className={`select-toggle ${selectMode ? "on" : ""}`} onClick={() => (selectMode ? exitSelect() : setSelectMode(true))} aria-pressed={selectMode}>
+                {selectMode ? "Done" : "Select"}
+              </button>
+              <button className="icon-btn" onClick={() => setPanelOpen(false)} aria-label="Close directory"><I.close /></button>
+            </div>
           </div>
           <div className="panel-search">
             <I.search width={16} height={16} />
@@ -306,6 +338,15 @@ export default function MapPage() {
             />
             {query && <button onClick={() => setQuery("")} aria-label="Clear search"><I.close width={14} height={14} /></button>}
           </div>
+          {selectMode && (
+            <div className="select-row">
+              <span>{picked.size} selected</span>
+              <button onClick={() => setPicked(new Set([...picked, ...listed.filter((m) => m.id !== meId).map((m) => m.id)]))}>
+                Select all {listed.filter((m) => m.id !== meId).length}
+              </button>
+              <button onClick={() => setPicked(new Set())} disabled={!picked.size}>None</button>
+            </div>
+          )}
           <div className="panel-body">
             {showSaved && saved.length === 0 && (
               <div className="empty">No saved contacts yet. Open anyone&rsquo;s profile and tap <b>Save contact</b> to add them here.</div>
@@ -318,10 +359,16 @@ export default function MapPage() {
             )}
             {listed.map((m) => (
               <div
-                key={m.id} className="person sq-host" role="button" tabIndex={0}
-                onClick={() => { select(m.id); locate(m); }}
-                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(m.id); locate(m); } }}
+                key={m.id} className={`person sq-host ${selectMode ? "selecting" : ""} ${picked.has(m.id) ? "picked" : ""}`}
+                role={selectMode ? "checkbox" : "button"} aria-checked={selectMode ? picked.has(m.id) : undefined} tabIndex={0}
+                onClick={() => { if (selectMode) { if (m.id !== meId) togglePick(m.id); } else { select(m.id); locate(m); } }}
+                onKeyDown={(e) => {
+                  if (e.key !== "Enter" && e.key !== " ") return;
+                  e.preventDefault();
+                  if (selectMode) { if (m.id !== meId) togglePick(m.id); } else { select(m.id); locate(m); }
+                }}
               >
+                {selectMode && <span className={`check ${m.id === meId ? "off" : ""}`} aria-hidden>{picked.has(m.id) && <I.check width={13} height={13} />}</span>}
                 <span className="thumb">
                   {m.avatar_url ? (
                     <>
@@ -352,6 +399,22 @@ export default function MapPage() {
               </div>
             ))}
           </div>
+          {selectMode && picked.size > 0 && !composeOpen && (
+            <div className="select-bar">
+              <span><b>{picked.size}</b> selected</span>
+              <button className="btn sm" onClick={() => { setComposeKey((k) => k + 1); setComposeOpen(true); }}>
+                <I.mail width={15} height={15} />Email group
+              </button>
+            </div>
+          )}
+          {composeOpen && picked.size > 0 && (
+            <GroupCompose
+              key={composeKey}
+              members={members.filter((m) => picked.has(m.id))}
+              draft={draft}
+              onClose={() => setComposeOpen(false)}
+            />
+          )}
         </aside>
 
         <MemberDrawer

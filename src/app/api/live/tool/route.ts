@@ -3,7 +3,7 @@ import { errorResponse, HttpError, rateLimit, requireUser } from "@/lib/server";
 import { loadContext, runTool } from "@/lib/concierge";
 
 const Body = z.object({
-  name: z.enum(["search_members", "highlight_members", "save_suggestion"]),
+  name: z.enum(["search_members", "highlight_members", "save_suggestion", "select_members"]),
   args: z.record(z.string(), z.unknown()).default({}),
 });
 
