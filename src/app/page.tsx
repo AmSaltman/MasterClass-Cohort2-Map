@@ -26,7 +26,7 @@ export default function Landing() {
       <IntroGlobe onPlotted={() => setRevealed(true)} />
       <div className="landing-shade" />
       <section className="landing-center">
-        <p className="eyebrow reveal r1">Welcome to the Fall &rsquo;26 Cohort</p>
+        <p className="eyebrow reveal r1">Fall &rsquo;26 Cohort Map</p>
         <h1 className="landing-title logo reveal r2">
           <span className="mc">MasterClass</span> <span className="ex">Executive</span> <span className="mp">Map</span>
         </h1>
