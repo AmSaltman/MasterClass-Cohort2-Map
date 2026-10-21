@@ -175,8 +175,11 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
       if (pts.length === 1) return void m.flyTo({ center: pts[0], zoom: 7, duration: 1600 });
       const b = new LngLatBounds(pts[0], pts[0]);
       pts.forEach((p) => b.extend(p));
-      // Spread around the whole world: just show the globe.
-      if (b.getEast() - b.getWest() > 150) return void m.flyTo({ center: [b.getCenter().lng, 25], zoom: homeZoom(box.current?.clientHeight || 800), duration: 1400 });
+      // Spread across continents: show the whole globe turned toward them.
+      if (b.getEast() - b.getWest() > 50 || b.getNorth() - b.getSouth() > 35) {
+        const c = b.getCenter();
+        return void m.flyTo({ center: [c.lng, Math.max(-50, Math.min(50, c.lat))], zoom: homeZoom(box.current?.clientHeight || 800), duration: 1400 });
+      }
       m.fitBounds(b, { padding: { top: 140, bottom: 120, left: 120, right: 120 }, maxZoom: 8, duration: 1600 });
     },
   }), []);

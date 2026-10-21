@@ -61,7 +61,7 @@ const ENRICH_SCHEMA = {
     },
     summary: {
       type: "string",
-      description: "1-2 sentence third-person summary of who this person is and what they do. Plain, factual, no hype.",
+      description: "1-2 sentence third-person summary of who this person is and what they do. Plain, factual, no hype. Refer to them by name — never guess gendered pronouns.",
     },
     lat: { type: ["number", "null"], description: "Latitude of the city center, or null if unknown." },
     lng: { type: ["number", "null"], description: "Longitude of the city center, or null if unknown." },

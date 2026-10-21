@@ -6,6 +6,7 @@ export type SocialKind = "linkedin" | "instagram" | "facebook" | "x" | "tiktok" 
 
 function handleFrom(value: string): string {
   let v = value.trim();
+  if (/^(www\.)?[\w-]+(\.[\w-]+)+\//i.test(v)) v = `https://${v}`; // "facebook.com/jane"
   try {
     if (/^https?:\/\//i.test(v)) {
       const u = new URL(v);

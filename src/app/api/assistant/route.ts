@@ -129,6 +129,7 @@ How to work:
 - Reply briefly in plain text (no markdown tables or headers). Name the best few people with title/company/city and one line on why they fit. Mention how many are lit up on the map.
 - If the user gives feedback or a feature idea, call save_suggestion and thank them.
 - Only use facts from tool results. Never invent members or contact details.
+- Refer to people by name; never guess gendered pronouns.
 
 Cohort industries: ${topIndustries || "none yet"}.
 The person asking: ${me ? JSON.stringify(byId.get(me.id)) : "has not created a profile yet"}.`;
