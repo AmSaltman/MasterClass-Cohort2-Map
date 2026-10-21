@@ -338,7 +338,7 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 .avatar-frame img, .photo { width: 100%; height: 100%; object-fit: cover; display: block; }
 .avatar-frame .sq { width: 100%; height: 100%; }
 .avatar-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
-.avatar.has-photo { padding: 0; overflow: hidden; }
+.avatar.has-photo { padding: 0; overflow: hidden; border: 2px solid var(--yellow); }
 .person .thumb { width: 46px; height: 46px; flex: none; overflow: hidden; position: relative; }
 .person .thumb .sq { width: 100%; height: 100%; padding: 5px; }
 .person .thumb .tag { position: absolute; right: 0; bottom: 0; width: 14px; height: 14px; }
