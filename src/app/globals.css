@@ -182,11 +182,11 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 .greeting.hide { opacity: 0; }
 
 .searchbar { position: absolute; z-index: 6; top: 24px; left: 50%; transform: translateX(-50%); width: min(620px, calc(100% - 32px)); display: flex; align-items: center; background: rgba(30, 30, 30, 0.88); border: 1px solid var(--line-2); backdrop-filter: blur(14px); height: 52px; }
-.searchbar svg { margin: 0 6px 0 16px; flex: none; color: var(--muted); }
+.searchbar > svg { margin: 0 6px 0 16px; flex: none; color: var(--muted); }
 .searchbar input { flex: 1; height: 100%; background: transparent; border: 0; outline: none; padding: 0 10px; font-size: 15px; min-width: 0; }
 .searchbar input::placeholder { color: var(--dim); }
 .searchbar .clear { padding: 0 10px; color: var(--muted); font-size: 13px; }
-.searchbar .ask { height: 100%; padding: 0 16px; border-left: 1px solid var(--line-2); font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+.searchbar .ask { height: 100%; padding: 0 18px; justify-content: center; border-left: 1px solid var(--line-2); font-weight: 600; font-size: 13px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
 .searchbar .ask:hover { background: var(--yellow); color: #141414; }
 
 .filter-chips { position: absolute; z-index: 6; top: 86px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; width: min(620px, calc(100% - 32px)); mask-image: linear-gradient(to right, #000 85%, transparent); }
