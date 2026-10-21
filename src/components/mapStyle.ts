@@ -35,7 +35,12 @@ export const mapStyle: StyleSpecification = {
   projection: { type: "globe" },
   glyphs: "https://tiles.openfreemap.org/fonts/{fontstack}/{range}.pbf",
   // Space around the globe is left transparent so the page grid shows behind it.
-  sky: { "atmosphere-blend": 0 },
+  sky: {
+    "sky-color": "rgba(28,28,28,0)",
+    "horizon-color": "rgba(28,28,28,0)",
+    "fog-color": "rgba(28,28,28,0)",
+    "atmosphere-blend": ["interpolate", ["linear"], ["zoom"], 0, 0.45, 4, 0.25, 6, 0],
+  },
   sources: {
     omt: { type: "vector", url: "https://tiles.openfreemap.org/planet" },
     graticule: { type: "geojson", data: graticule() },

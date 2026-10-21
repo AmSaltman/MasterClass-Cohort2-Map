@@ -88,7 +88,7 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
   const size = useRef(16);
   const [styleReady, setStyleReady] = useState(false);
   const homeRef = useRef<[number, number]>(home || US_CENTER);
-  // Entry fly-in: plays once per browser session (skipped for reduced motion).
+  // Entry fly-in: plays every time the map opens (skipped for reduced motion).
   const entry = useRef<{ start: number } | null>(null);
   const homeZoomFor = () => homeZoom(box.current?.clientHeight || 800) + 0.35;
   const selectRef = useRef(onSelect);
@@ -100,16 +100,16 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
   useEffect(() => {
     if (!box.current) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const play = !reduced && !sessionStorage.getItem("map-entry-played");
+    const play = !reduced;
     const [homeLng, homeLat] = homeRef.current;
-    const startLng = homeLng - 150;
+    const startLng = homeLng - 170; // start on the far side of the world, spin east to you
     if (play) entry.current = { start: startLng };
     const finalZoom = homeZoom(box.current.clientHeight) + 0.35;
     const m = new MLMap({
       container: box.current,
       style: mapStyle,
       center: play ? [startLng, Math.max(-20, Math.min(40, homeLat - 10))] : homeRef.current,
-      zoom: play ? finalZoom - 0.7 : finalZoom,
+      zoom: play ? finalZoom - 0.9 : finalZoom,
       minZoom: 0.8,
       maxZoom: 13,
       renderWorldCopies: false,
@@ -125,8 +125,7 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
       m.addLayer({ id: "routes-base", type: "line", source: "routes", layout: { "line-cap": "round" }, paint: { "line-color": "#F2C94C", "line-width": 1, "line-opacity": 0.35 } });
       m.addLayer({ id: "routes-dash", type: "line", source: "routes", paint: { "line-color": "#F2C94C", "line-width": 1.4, "line-opacity": 0.7, "line-dasharray": DASHES[0] } });
       setStyleReady(true);
-      if (play) sessionStorage.setItem("map-entry-played", "1");
-      if (play) m.easeTo({ center: homeRef.current, zoom: finalZoom, duration: 3400, easing: (t) => 1 - Math.pow(1 - t, 3) });
+      if (play) m.easeTo({ center: homeRef.current, zoom: finalZoom, duration: 4200, easing: (t) => 1 - Math.pow(1 - t, 3) });
     });
     const sizeUp = () => {
       const next = markerSize(m.getZoom());
