@@ -66,18 +66,32 @@ export default function MapPage() {
   const firstName = me?.full_name.split(" ")[0] || "";
   const index = useMemo(() => members.map((m) => [m, haystack(m)] as const), [members]);
 
-  const industries = useMemo(() => {
-    const counts = new Map<string, number>();
-    members.forEach((m) => industriesOf(m).forEach((k) => counts.set(k, (counts.get(k) || 0) + 1)));
-    return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k]) => k);
+  // Every industry in the cohort, merged case-insensitively ("AI" = "ai"),
+  // labelled with its most common spelling, most popular first.
+  const allIndustries = useMemo(() => {
+    const groups = new Map<string, { count: number; spellings: Map<string, number> }>();
+    members.forEach((m) => new Set(industriesOf(m).map((x) => x.trim())).forEach((label) => {
+      const key = label.toLowerCase();
+      const g = groups.get(key) || { count: 0, spellings: new Map() };
+      g.count++;
+      g.spellings.set(label, (g.spellings.get(label) || 0) + 1);
+      groups.set(key, g);
+    }));
+    return [...groups.entries()]
+      .map(([key, g]) => ({ key, count: g.count, label: [...g.spellings.entries()].sort((a, b) => b[1] - a[1])[0][0] }))
+      .sort((a, b) => b.count - a.count || a.label.localeCompare(b.label));
   }, [members]);
+  const [allOpen, setAllOpen] = useState(false);
+  const [industryFilter, setIndustryFilter] = useState("");
+  const topIndustries = allIndustries.slice(0, 8);
+  const selectedExtra = industry && !topIndustries.some((i) => i.key === industry) ? allIndustries.find((i) => i.key === industry) : undefined;
   const countries = useMemo(() => new Set(members.map((m) => m.country).filter(Boolean)).size, [members]);
 
   const localMatches = useMemo(() => {
     const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
     if (!tokens.length && !industry) return null;
     return index
-      .filter(([m, h]) => (!industry || industriesOf(m).includes(industry)) && tokens.every((t) => h.includes(t)))
+      .filter(([m, h]) => (!industry || industriesOf(m).some((x) => x.trim().toLowerCase() === industry)) && tokens.every((t) => h.includes(t)))
       .map(([m]) => m);
   }, [index, query, industry]);
 
@@ -145,7 +159,7 @@ export default function MapPage() {
     const next = industry === k ? null : k;
     setIndustry(next);
     if (next) {
-      const ids = members.filter((m) => industriesOf(m).includes(next)).map((m) => m.id);
+      const ids = members.filter((m) => industriesOf(m).some((x) => x.trim().toLowerCase() === next)).map((m) => m.id);
       setPanelOpen(true);
       globe.current?.fitMembers(ids);
     }
@@ -230,12 +244,40 @@ export default function MapPage() {
             <button onClick={clearAll}>Clear</button>
           </div>
         ) : (
-          industries.length > 1 && (
-            <div className="filter-chips" role="toolbar" aria-label="Filter by industry">
-              {industries.map((k) => (
-                <button key={k} className={`chip ${industry === k ? "on" : ""}`} onClick={() => pickIndustry(k)} aria-pressed={industry === k}>{k}</button>
-              ))}
-            </div>
+          allIndustries.length > 0 && (
+            <>
+              <div className="filter-chips" role="toolbar" aria-label="Filter by industry">
+                {allIndustries.length > topIndustries.length && (
+                  <button className={`chip more ${allOpen ? "on" : ""}`} onClick={() => setAllOpen((o) => !o)} aria-expanded={allOpen}>
+                    All {allIndustries.length} <I.list width={13} height={13} style={{ verticalAlign: "-2px", marginLeft: 4 }} />
+                  </button>
+                )}
+                {selectedExtra && (
+                  <button className="chip on" onClick={() => pickIndustry(selectedExtra.key)} aria-pressed>{selectedExtra.label}</button>
+                )}
+                {topIndustries.map((i) => (
+                  <button key={i.key} className={`chip ${industry === i.key ? "on" : ""}`} onClick={() => pickIndustry(i.key)} aria-pressed={industry === i.key}>{i.label}</button>
+                ))}
+              </div>
+              {allOpen && (
+                <div className="industry-pop" role="dialog" aria-label="All industries">
+                  <div className="panel-search" style={{ margin: 0 }}>
+                    <I.search width={16} height={16} />
+                    <input autoFocus value={industryFilter} onChange={(e) => setIndustryFilter(e.target.value)} placeholder={`Search ${allIndustries.length} industries…`} aria-label="Search industries" />
+                    <button onClick={() => setAllOpen(false)} aria-label="Close"><I.close width={14} height={14} /></button>
+                  </div>
+                  <div className="industry-list">
+                    {allIndustries
+                      .filter((i) => i.key.includes(industryFilter.trim().toLowerCase()))
+                      .map((i) => (
+                        <button key={i.key} className={industry === i.key ? "on" : ""} onClick={() => { pickIndustry(i.key); setAllOpen(false); setIndustryFilter(""); }}>
+                          <span>{i.label}</span><b>{i.count}</b>
+                        </button>
+                      ))}
+                  </div>
+                </div>
+              )}
+            </>
           )
         )}
 

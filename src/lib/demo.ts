@@ -12,6 +12,7 @@ const CITIES: [string, string, string, number, number][] = [
   ["Lagos", "", "Nigeria", 6.52, 3.38], ["Mumbai", "", "India", 19.08, 72.88],
 ];
 const INDUSTRIES = ["Healthcare", "Real Estate", "Software & SaaS", "Financial Services", "Consumer Goods", "Marketing & Advertising", "Hospitality", "AI & Machine Learning"];
+const EXTRA = ["Fintech", "ai", "Biotech", "E-commerce", "Logistics", "Media", "Education", "Energy", "Legal", "Construction", "Fitness", "Wine & Spirits", "Aviation", "Cybersecurity"];
 const FIRST = ["Ava", "Marcus", "Priya", "Daniel", "Sofia", "James", "Leila", "Ethan", "Grace", "Omar", "Chloe", "Ryan", "Nina", "Victor", "Hannah", "Diego"];
 const LAST = ["Chen", "Okafor", "Patel", "Reyes", "Novak", "Hughes", "Haddad", "Park", "Silva", "Brooks", "Klein", "Ward", "Sato", "Moreau", "Lind", "Ruiz"];
 
@@ -25,7 +26,7 @@ export function demoMembers(n = 140): Member[] {
       city: c[0], region: c[1], country: c[2], lat: c[3], lng: c[4],
       company: `${LAST[(i * 5) % LAST.length]} ${["Group", "Labs", "Partners", "Health", "Capital"][i % 5]}`,
       title: ["CEO", "Founder", "COO", "VP Sales", "Managing Partner"][i % 5],
-      industry: ind, industries: [ind], ai_industry: ind, bio: `Leads a ${ind.toLowerCase()} business in ${c[0]}.`,
+      industry: ind, industries: [ind, EXTRA[(i * 11) % EXTRA.length]], ai_industry: ind, bio: `Leads a ${ind.toLowerCase()} business in ${c[0]}.`,
       looking_for: "Partners and intros", can_help_with: "Scaling teams, go-to-market",
       linkedin: "linkedin.com/in/demo", instagram: "@demo", facebook: "demo", x: "@demo", tiktok: null,
       youtube: null, website: "example.com", whatsapp: "+12065550100",

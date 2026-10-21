@@ -13,14 +13,23 @@ export function Logo({ href = "/" }: { href?: string }) {
   );
 }
 
-// "SUBJECTS ▢▢▢▢▢"-style meter: five boxes fill up as the number grows.
-function Meter({ label, value, steps }: { label: string; value: number; steps: number[] }) {
-  const on = steps.filter((s) => value >= s).length;
+// Expected cohort size: the members meter is full at this many people.
+export const COHORT_SIZE = 1000;
+
+// "SUBJECTS ▢▢▢▢▢"-style meter. Five boxes, each worth max/5; boxes fill
+// proportionally (e.g. 800 of 1000 members = 4 full boxes, 500 = 2½).
+function Meter({ label, value, max }: { label: string; value: number; max: number }) {
+  const per = max / 5;
   return (
     <div className="meter" title={`${value} ${label.toLowerCase()}`}>
       <span>{label}</span>
       <span className="boxes">
-        {steps.map((s, i) => <span key={s} className={i < on ? "on" : ""} />)}
+        {[0, 1, 2, 3, 4].map((i) => {
+          // At least a sliver as soon as there's one, so a new cohort isn't empty.
+          const fill = Math.min(1, Math.max(0, (value - i * per) / per));
+          const shown = value > 0 && i === 0 ? Math.max(fill, 0.15) : fill;
+          return <span key={i}><i style={{ width: `${shown * 100}%` }} /></span>;
+        })}
       </span>
       <b>{value}</b>
     </div>
@@ -43,8 +52,8 @@ export function TopBar({ name, photo, members, countries, onDirectory, onGlobe, 
       <Logo href="/map" />
       {members !== undefined && (
         <div className="meters">
-          <Meter label="Members" value={members} steps={[1, 50, 200, 500, 900]} />
-          <Meter label="Countries" value={countries || 0} steps={[1, 5, 15, 30, 50]} />
+          <Meter label="Members" value={members} max={COHORT_SIZE} />
+          <Meter label="Countries" value={countries || 0} max={50} />
         </div>
       )}
       <nav className="top-actions">
