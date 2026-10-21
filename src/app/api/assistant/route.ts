@@ -117,6 +117,10 @@ export async function POST(req: Request) {
       for (const ind of (m.industries as string[]) || []) industries.set(ind, (industries.get(ind) || 0) + 1);
     }
     const me = (all || []).find((m) => m.id === user.id);
+    // The asker's private saved-contacts list, so "my saved contacts" questions work.
+    const { data: savedRows } = await adminClient()
+      .from("saved_contacts").select("contact_id").eq("member_id", user.id).order("created_at");
+    const savedPeople = (savedRows || []).map((r) => byId.get(r.contact_id)).filter(Boolean);
     const topIndustries = [...industries.entries()].sort((a, b) => b[1] - a[1]).slice(0, 30)
       .map(([k, v]) => `${k} (${v})`).join(", ");
 
@@ -132,7 +136,9 @@ How to work:
 - Refer to people by name; never guess gendered pronouns.
 
 Cohort industries: ${topIndustries || "none yet"}.
-The person asking: ${me ? JSON.stringify(byId.get(me.id)) : "has not created a profile yet"}.`;
+The person asking: ${me ? JSON.stringify(byId.get(me.id)) : "has not created a profile yet"}.
+Their saved contacts (private to them; ${savedPeople.length}): ${savedPeople.length ? JSON.stringify(savedPeople) : "none yet"}.
+When they ask about "my saved contacts" / "people I saved", answer from that list and highlight those ids.`;
 
     const contents: Content[] = parsed.data.messages.map((m) => ({
       role: m.role === "assistant" ? "model" : "user",
