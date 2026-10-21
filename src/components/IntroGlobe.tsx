@@ -58,6 +58,13 @@ export default function IntroGlobe({ onPlotted }: { onPlotted?: () => void }) {
       renderWorldCopies: false,
     });
     const markers: Marker[] = [];
+    // Cursor position, -1..1 from the screen center.
+    const pointer = { x: 0, y: 0 };
+    const onMove = (e: PointerEvent) => {
+      pointer.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.y = (e.clientY / window.innerHeight) * 2 - 1;
+    };
+    window.addEventListener("pointermove", onMove);
     let raf = 0;
     const timers: ReturnType<typeof setTimeout>[] = [];
 
@@ -75,12 +82,17 @@ export default function IntroGlobe({ onPlotted }: { onPlotted?: () => void }) {
         m.easeTo({ center: END, zoom, duration: 3400, easing: (t) => 1 - Math.pow(1 - t, 3) });
       }
       timers.push(setTimeout(() => done.current?.(), reduced ? 0 : 1500));
-      // Slow, continuous drift once the intro settles.
+      // Once the intro settles: slow drift, plus the globe leans toward the cursor.
       timers.push(setTimeout(() => {
         if (reduced) return;
+        let base = m.getCenter().lng;
+        const offset = { x: 0, y: 0 };
         const spin = () => {
-          const c = m.getCenter();
-          m.setCenter([c.lng + 0.02, c.lat]);
+          base += 0.02;
+          // Ease toward the cursor so it glides rather than snaps.
+          offset.x += (pointer.x - offset.x) * 0.05;
+          offset.y += (pointer.y - offset.y) * 0.05;
+          m.setCenter([base - offset.x * 14, Math.max(-60, Math.min(70, END[1] + offset.y * 9))]);
           raf = requestAnimationFrame(spin);
         };
         raf = requestAnimationFrame(spin);
@@ -88,6 +100,7 @@ export default function IntroGlobe({ onPlotted }: { onPlotted?: () => void }) {
     });
 
     return () => {
+      window.removeEventListener("pointermove", onMove);
       cancelAnimationFrame(raf);
       timers.forEach(clearTimeout);
       markers.forEach((mk) => mk.remove());

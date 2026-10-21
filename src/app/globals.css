@@ -366,7 +366,7 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 @keyframes ring-a { 0% { width: 100%; height: 100%; } 100% { width: 60%; height: 60%; } }
 @keyframes ring-b { 0% { width: 90%; height: 90%; } 100% { width: 20%; height: 20%; } }
 .landing .landing-shade { background: radial-gradient(ellipse at center, rgba(20,20,20,0.15) 0%, rgba(20,20,20,0.4) 55%, rgba(20,20,20,0.7) 100%); transition: background 1.2s var(--ease); }
-.landing.revealed .landing-shade { background: radial-gradient(ellipse at center, rgba(20,20,20,0.38) 0%, rgba(20,20,20,0.5) 55%, rgba(20,20,20,0.78) 100%); }
+.landing.revealed .landing-shade { background: radial-gradient(ellipse at center, rgba(20,20,20,0.52) 0%, rgba(20,20,20,0.62) 55%, rgba(20,20,20,0.84) 100%); }
 .landing-title, .landing-sub, .landing .eyebrow { text-shadow: 0 2px 24px rgba(0,0,0,0.6); }
 .reveal { opacity: 0; transform: translateY(18px); transition: opacity 0.9s var(--ease), transform 0.9s var(--ease); }
 .revealed .reveal { opacity: 1; transform: none; }
