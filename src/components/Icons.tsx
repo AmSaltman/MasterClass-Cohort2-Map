@@ -35,5 +35,6 @@ export const I = {
   logout: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M14 4.5H5.5v15H14M10 12h10m-3.5-3.5L20 12l-3.5 3.5" /></svg>,
   bookmark: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M6.5 3.5h11v17L12 16l-5.5 4.5v-17Z" /></svg>,
   bookmarkFilled: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)} fill="currentColor"><path d="M6.5 3.5h11v17L12 16l-5.5 4.5v-17Z" /></svg>,
+  arrowUpRight: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><path d="M7 17 17 7M9 7h8v8" /></svg>,
   target: (p: SVGProps<SVGSVGElement>) => <svg {...base(p)}><circle cx="12" cy="12" r="7.5" /><circle cx="12" cy="12" r="2.5" /><path d="M12 2v3M12 19v3M2 12h3M19 12h3" /></svg>,
 };

@@ -259,7 +259,11 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 .tags span { font-size: 12px; padding: 3px 8px; border: 1px solid var(--line-2); color: var(--muted); }
 .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 .contact { display: flex; align-items: center; gap: 10px; height: 44px; padding: 0 12px; border: 1px solid var(--line-2); text-decoration: none; font-size: 13px; font-weight: 500; transition: border-color 0.2s, background 0.2s; text-align: left; }
-.contact:hover { border-color: var(--text); background: rgba(255,255,255,0.04); }
+.contact { transition: border-color 0.2s, background 0.2s, color 0.2s; }
+.contact:hover, .contact:focus-visible { border-color: var(--yellow); background: var(--yellow); color: #141414; }
+.contact:hover svg { opacity: 1; }
+.contact .go { margin-left: auto; opacity: 0; transform: translate(-5px, 5px); transition: opacity 0.25s var(--ease), transform 0.25s var(--ease); }
+.contact:hover .go, .contact:focus-visible .go { opacity: 1; transform: none; }
 .contact svg { flex: none; opacity: 0.85; }
 .intro-box { border: 1px solid var(--yellow); padding: 14px; font-size: 14px; white-space: pre-wrap; background: rgba(242, 201, 76, 0.05); }
 

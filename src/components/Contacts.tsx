@@ -54,7 +54,7 @@ export function ContactGrid({ member, message, extra }: { member: Member; messag
   return (
     <div className="contact-grid">
       {contactLinks(member, message).map((l) => (
-        <a key={l.key} className="contact" href={l.href} {...ext(l.href)}>{l.icon}{l.label}</a>
+        <a key={l.key} className="contact" href={l.href} {...ext(l.href)}>{l.icon}{l.label}<I.arrowUpRight className="go" width={16} height={16} aria-hidden /></a>
       ))}
       {extra}
     </div>
