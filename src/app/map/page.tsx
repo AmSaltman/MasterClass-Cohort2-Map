@@ -331,11 +331,24 @@ export default function MapPage() {
                   ) : <Square seed={m.id} />}
                 </span>
                 <div style={{ minWidth: 0 }}>
-                  <b>{m.full_name}{m.id === meId ? " (you)" : ""}{saved.includes(m.id) && <I.bookmarkFilled width={12} height={12} style={{ color: "var(--yellow)", marginLeft: 6, verticalAlign: "-1px" }} />}</b>
+                  <b>{m.full_name}{m.id === meId ? " (you)" : ""}</b>
                   <div className="meta">{[m.title, m.company].filter(Boolean).join(" · ")}</div>
                   <div className="loc">{[industriesOf(m).join(" · "), [m.city, m.country].filter(Boolean).join(", ")].filter(Boolean).join(" — ")}</div>
                   <QuickContacts member={m} />
                 </div>
+                {m.id !== meId && (
+                  <button
+                    className={`row-save ${saved.includes(m.id) ? "on" : ""}`}
+                    onClick={(e) => { e.stopPropagation(); toggleSave(m.id); }}
+                    onKeyDown={(e) => e.stopPropagation()}
+                    aria-pressed={saved.includes(m.id)}
+                    aria-label={saved.includes(m.id) ? `Remove ${m.full_name} from saved contacts` : `Save ${m.full_name} to my contacts`}
+                    title={saved.includes(m.id) ? "Saved — click to remove" : "Save contact"}
+                  >
+                    {saved.includes(m.id) ? <I.bookmarkFilled width={15} height={15} /> : <I.bookmark width={15} height={15} />}
+                    <span>{saved.includes(m.id) ? "Saved" : "Save"}</span>
+                  </button>
+                )}
               </div>
             ))}
           </div>

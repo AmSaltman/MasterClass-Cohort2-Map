@@ -425,3 +425,9 @@ html.lock, html.lock body { overflow: hidden; height: 100%; overscroll-behavior:
 /* Map entry: squares pop in as the globe sweeps to you. "backwards" fill so
    hover/scale transforms work normally once the animation ends. */
 .mk.enter .sq { animation: plot 0.9s var(--ease) var(--d) backwards; }
+
+.person { position: relative; }
+.person > div { padding-right: 70px; }
+.row-save { position: absolute; top: 14px; right: 18px; display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px; border: 1px solid var(--line-2); color: var(--muted); font-size: 12px; font-weight: 600; transition: color 0.2s, border-color 0.2s, background 0.2s; }
+.row-save:hover { color: var(--text); border-color: var(--text); }
+.row-save.on { background: var(--yellow); border-color: var(--yellow); color: #141414; }
