@@ -121,9 +121,9 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
     m.touchZoomRotate.disableRotation();
     m.on("load", () => {
       m.addSource("routes", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
-      m.addLayer({ id: "routes-glow", type: "line", source: "routes", layout: { "line-cap": "round" }, paint: { "line-color": "#F2C94C", "line-width": 10, "line-opacity": 0.22, "line-blur": 5 } });
-      m.addLayer({ id: "routes-base", type: "line", source: "routes", layout: { "line-cap": "round" }, paint: { "line-color": "#F2C94C", "line-width": 1.6, "line-opacity": 0.55 } });
-      m.addLayer({ id: "routes-dash", type: "line", source: "routes", paint: { "line-color": "#F2C94C", "line-width": 3, "line-dasharray": DASHES[0] } });
+      m.addLayer({ id: "routes-glow", type: "line", source: "routes", layout: { "line-cap": "round" }, paint: { "line-color": "#F2C94C", "line-width": 6, "line-opacity": 0.08, "line-blur": 4 } });
+      m.addLayer({ id: "routes-base", type: "line", source: "routes", layout: { "line-cap": "round" }, paint: { "line-color": "#F2C94C", "line-width": 1, "line-opacity": 0.35 } });
+      m.addLayer({ id: "routes-dash", type: "line", source: "routes", paint: { "line-color": "#F2C94C", "line-width": 1.4, "line-opacity": 0.7, "line-dasharray": DASHES[0] } });
       setStyleReady(true);
       if (play) sessionStorage.setItem("map-entry-played", "1");
       if (play) m.easeTo({ center: homeRef.current, zoom: finalZoom, duration: 3400, easing: (t) => 1 - Math.pow(1 - t, 3) });
@@ -238,7 +238,7 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
     if (!from || !targets.length) return;
     let step = 0, last = 0, raf = 0;
     const tick = (t: number) => {
-      if (t - last > 60) {
+      if (t - last > 140) { // slow, gentle drift
         step = (step + 1) % DASHES.length;
         if (m.getLayer("routes-dash")) m.setPaintProperty("routes-dash", "line-dasharray", DASHES[step]);
         last = t;
