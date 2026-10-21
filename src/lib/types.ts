@@ -69,7 +69,7 @@ export const EMPTY_PROFILE: ProfileInput = {
   show_email: true, show_phone: false, ai_summary: "", tags: [],
 };
 
-export type ChatTurn = { role: "user" | "assistant"; text: string };
+export type ChatTurn = { role: "user" | "assistant"; text: string; voice?: boolean; live?: boolean };
 
 export type AssistantReply = {
   reply: string;

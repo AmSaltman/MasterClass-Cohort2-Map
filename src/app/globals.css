@@ -293,10 +293,6 @@ html.lock, html.lock body { overflow: hidden; height: 100%; overscroll-behavior:
 .ai-input textarea { flex: 1; resize: none; background: transparent; border: 0; outline: none; padding: 14px 16px; font-size: 14px; height: 54px; line-height: 1.4; }
 .ai-input button { width: 54px; display: grid; place-items: center; border-left: 1px solid var(--line); }
 .ai-input button:hover { background: var(--yellow); color: #141414; }
-.typing { display: inline-flex; gap: 4px; }
-.typing i { width: 6px; height: 6px; background: var(--yellow); animation: blink 1s infinite; }
-.typing i:nth-child(2) { animation-delay: 0.15s; } .typing i:nth-child(3) { animation-delay: 0.3s; }
-@keyframes blink { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
 
 .toast { position: fixed; z-index: 200; left: 50%; top: 20px; transform: translateX(-50%); background: var(--text); color: #141414; padding: 10px 16px; font-size: 14px; font-weight: 600; }
 
@@ -431,3 +427,29 @@ html.lock, html.lock body { overflow: hidden; height: 100%; overscroll-behavior:
 .row-save { position: absolute; top: 14px; right: 18px; display: inline-flex; align-items: center; gap: 5px; height: 30px; padding: 0 10px; border: 1px solid var(--line-2); color: var(--muted); font-size: 12px; font-weight: 600; transition: color 0.2s, border-color 0.2s, background 0.2s; }
 .row-save:hover { color: var(--text); border-color: var(--text); }
 .row-save.on { background: var(--yellow); border-color: var(--yellow); color: #141414; }
+
+/* Thinking: the morphing MasterClass square */
+.msg.thinking { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; letter-spacing: 0.02em; }
+.shift.tiny { width: 20px; height: 20px; box-shadow: none; }
+.shift.tiny i { animation-duration: 2.2s; }
+
+/* Voice mode */
+.ai-input .voice-btn { border-left: 1px solid var(--line); }
+.ai-input .voice-btn svg { color: var(--yellow); }
+.ai-input .voice-btn:hover svg { color: #141414; }
+.voice-bar { display: flex; align-items: center; gap: 14px; border-top: 1px solid var(--line); padding: 0 8px 0 16px; height: 54px; background: rgba(242, 201, 76, 0.06); }
+.voice-status { flex: 1; font-size: 13px; color: var(--text); }
+.voice-end { height: 34px; padding: 0 14px; background: var(--text); color: #141414; font-weight: 600; font-size: 13px; }
+.voice-end:hover { background: var(--danger); color: #fff; }
+.wave { display: inline-flex; align-items: center; gap: 3px; height: 24px; }
+.wave i { width: 3px; height: 30%; background: var(--yellow); animation: wave 1.2s ease-in-out infinite; }
+.wave i:nth-child(1), .wave i:nth-child(7) { animation-delay: -0.9s; }
+.wave i:nth-child(2), .wave i:nth-child(6) { animation-delay: -0.6s; }
+.wave i:nth-child(3), .wave i:nth-child(5) { animation-delay: -0.3s; }
+.wave.speaking i { animation-duration: 0.55s; }
+.wave.listening i { animation-duration: 1.6s; opacity: 0.85; }
+.wave.thinking i, .wave.connecting i { animation-duration: 2.4s; opacity: 0.5; }
+@keyframes wave { 0%, 100% { height: 18%; } 50% { height: 100%; } }
+.msg .who svg { margin-left: 6px; vertical-align: -2px; color: var(--yellow); }
+.msg.user .said { margin-right: 6px; vertical-align: -2px; opacity: 0.6; }
+.msg.live { opacity: 0.75; }

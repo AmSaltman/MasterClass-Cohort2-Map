@@ -4,6 +4,7 @@ import { z } from "zod";
 import type { ProfileInput } from "./types";
 
 export const CHAT_MODEL = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+export const LIVE_MODEL = process.env.GEMINI_LIVE_MODEL || "gemini-3.8-live";
 export const EMBED_MODEL = process.env.GEMINI_EMBED_MODEL || "gemini-embedding-2";
 export const EMBED_DIMS = 768; // must match vector(768) in supabase/schema.sql
 
