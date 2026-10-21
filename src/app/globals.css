@@ -431,7 +431,11 @@ html.lock, html.lock body { overflow: hidden; height: 100%; overscroll-behavior:
 /* Thinking: the morphing MasterClass square */
 .msg.thinking { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 13px; letter-spacing: 0.02em; }
 .shift.tiny { width: 20px; height: 20px; box-shadow: none; }
-.shift.tiny i { animation-duration: 2.2s; }
+/* Slow, calm loop: 9.6s cycle, rings evenly offset by a quarter-cycle. */
+.shift.tiny i { animation-duration: 9.6s; }
+.shift.tiny i:nth-child(2) { animation-delay: -2.4s; }
+.shift.tiny i:nth-child(3) { animation-delay: -4.8s; }
+.shift.tiny i:nth-child(4) { animation-delay: -7.2s; }
 
 /* Voice mode */
 .ai-input .voice-btn { border-left: 1px solid var(--line); }
