@@ -9,6 +9,7 @@ export function Logo({ href = "/" }: { href?: string }) {
       <span className="mc">Fall &rsquo;26</span>
       <span className="ex">Cohort</span>
       <span className="mp">Map</span>
+      <span className="beta" aria-label="beta">Beta</span>
     </Link>
   );
 }

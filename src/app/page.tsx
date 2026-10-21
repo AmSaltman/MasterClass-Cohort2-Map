@@ -28,7 +28,7 @@ export default function Landing() {
       <section className="landing-center">
         <p className="eyebrow reveal r1">MasterClass Executive</p>
         <h1 className="landing-title logo reveal r2">
-          <span className="mc">Fall &rsquo;26</span> <span className="ex">Cohort</span> <span className="mp">Map</span>
+          <span className="mc">Fall &rsquo;26</span> <span className="ex">Cohort</span> <span className="mp">Map<span className="beta" aria-label="beta">Beta</span></span>
         </h1>
         <p className="landing-sub reveal r3">
           Find classmates by city, industry, or what they&rsquo;re building &mdash; and reach them in one tap.

@@ -485,3 +485,8 @@ html.lock, html.lock body { overflow: hidden; height: 100%; overscroll-behavior:
 .seg button.on { background: var(--text); color: #141414; }
 .compose-actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .btn.disabled { opacity: 0.4; pointer-events: none; }
+
+/* Classic "beta" tag next to the logo */
+.logo .beta { align-self: flex-start; margin-left: 0.15em; padding: 2px 5px 1px; border: 1px solid var(--yellow); color: var(--yellow); font-family: var(--sans); font-size: 9px; font-weight: 700; letter-spacing: 0.12em; line-height: 1.2; text-transform: uppercase; }
+.landing-title .mp { position: relative; }
+.landing-title .beta { position: absolute; top: 0.08em; left: 100%; margin-left: 0.18em; font-size: max(10px, 0.13em); padding: 0.25em 0.45em 0.15em; }
