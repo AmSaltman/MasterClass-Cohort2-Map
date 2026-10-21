@@ -102,7 +102,7 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const play = !reduced;
     const [homeLng, homeLat] = homeRef.current;
-    const startLng = homeLng - 170; // start on the far side of the world, spin east to you
+    const startLng = homeLng + 170; // start on the far side of the world, spin west to you
     if (play) entry.current = { start: startLng };
     const finalZoom = homeZoom(box.current.clientHeight) + 0.35;
     const m = new MLMap({
@@ -154,7 +154,7 @@ export default function Globe({ members, matchIds, selectedId, meId, onSelect, h
     const intro = entry.current;
     const order = new Map<string, number>();
     if (intro) {
-      const spread = members.filter((x) => x.lng !== null).sort((a, b) => ((a.lng! - intro.start + 720) % 360) - ((b.lng! - intro.start + 720) % 360));
+      const spread = members.filter((x) => x.lng !== null).sort((a, b) => ((intro.start - a.lng! + 720) % 360) - ((intro.start - b.lng! + 720) % 360));
       const step = Math.min(18, 2400 / Math.max(1, spread.length));
       spread.forEach((x, k) => order.set(x.id, 350 + k * step));
       entry.current = null;
