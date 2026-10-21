@@ -107,3 +107,10 @@ insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_typ
 values ('avatars', 'avatars', true, 2097152, array['image/jpeg', 'image/png', 'image/webp'])
 on conflict (id) do update set public = true, file_size_limit = 2097152,
   allowed_mime_types = array['image/jpeg', 'image/png', 'image/webp'];
+
+-- Multiple industries (added v3). The member's own words; `industry` keeps the
+-- joined string for display/back-compat.
+alter table public.members add column if not exists industries text[] not null default '{}';
+update public.members
+set industries = array(select btrim(x) from unnest(string_to_array(industry, ',')) x where btrim(x) <> '')
+where cardinality(industries) = 0 and coalesce(industry, '') <> '';

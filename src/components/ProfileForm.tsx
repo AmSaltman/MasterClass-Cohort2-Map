@@ -3,7 +3,9 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, type ReactNode } from "react";
 import { AvatarPicker, type AvatarChange } from "./AvatarPicker";
+import { ChipInput } from "./ChipInput";
 import { CityInput } from "./CityInput";
+import { I } from "./Icons";
 import { ShiftSquare } from "./Square";
 import { api, sb, uploadAvatar } from "@/lib/supabase-browser";
 import type { ProfileInput } from "@/lib/types";
@@ -143,7 +145,9 @@ export function ProfileForm({ mode, initial, avatarUrl = null, seed = "you" }: {
       <Section num="03" title="Your work" text="The more you share, the better the AI can match you with the right classmates.">
         <Field label="Title" htmlFor="title"><input {...text("title")} placeholder="CEO, Founder, VP Sales…" autoComplete="organization-title" /></Field>
         <Field label="Company" htmlFor="company"><input {...text("company")} autoComplete="organization" /></Field>
-        <Field label="Industry" htmlFor="industry"><input {...text("industry")} placeholder="Healthcare, Real Estate, SaaS…" /></Field>
+        <Field label="Industries" htmlFor="industries" hint="Add as many as fit — press Enter or comma after each.">
+          <ChipInput id="industries" values={p.industries} onChange={(v) => set("industries", v)} placeholder="e.g. AI, Web, Search" />
+        </Field>
         <Field label="Website" htmlFor="website"><input {...text("website")} placeholder="yourcompany.com" inputMode="url" /></Field>
         <Field label="What you do" full htmlFor="bio" hint="A few sentences on your business, role, and focus.">
           <textarea {...text("bio")} rows={4} />
@@ -178,6 +182,22 @@ export function ProfileForm({ mode, initial, avatarUrl = null, seed = "you" }: {
         </label>
       </Section>
 
+      {mode === "edit" && (
+        <Section num="06" title="How the AI describes you" text="This is what classmates and the AI search see. Edit anything that isn't right — your changes are kept.">
+          <Field label="Summary" full htmlFor="ai_summary" hint={p.ai_summary ? undefined : "Will be written from your profile when you save."}>
+            <textarea id="ai_summary" className="input" rows={3} value={p.ai_summary} onChange={(e) => set("ai_summary", e.target.value)} placeholder="One or two sentences about you" />
+          </Field>
+          <Field label="Search tags" full htmlFor="tags" hint="Keywords people might search to find you.">
+            <ChipInput id="tags" values={p.tags} onChange={(v) => set("tags", v)} max={20} lowercase placeholder="e.g. seo, website builders" />
+          </Field>
+          <div className="full">
+            <button type="button" className="btn ghost sm" onClick={() => setP((prev) => ({ ...prev, ai_summary: "", tags: [] }))}>
+              <I.sparkle width={15} height={15} />Regenerate with AI on save
+            </button>
+          </div>
+        </Section>
+      )}
+
       {error && <p className="error" role="alert" style={{ marginTop: 24 }}>{error}</p>}
 
       <div className="form-foot">
@@ -199,11 +219,11 @@ export function ProfileForm({ mode, initial, avatarUrl = null, seed = "you" }: {
             <h3>{stage}<span className="dot-y" /></h3>
             {ai ? (
               <p style={{ maxWidth: 460, margin: "10px auto 0" }}>
-                Filed under <b style={{ color: "var(--text)" }}>{ai.industry || "your industry"}</b>
+                Filed under <b style={{ color: "var(--text)" }}>{ai.industry || "your profile"}</b>
                 {ai.tags.length > 0 && <> · {ai.tags.slice(0, 5).join(", ")}</>}
               </p>
             ) : (
-              <p>Normalizing your industry, tagging your expertise, and making you searchable.</p>
+              <p>Summarizing your profile, tagging your expertise, and making you searchable.</p>
             )}
           </div>
         </div>

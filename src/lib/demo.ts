@@ -25,7 +25,7 @@ export function demoMembers(n = 140): Member[] {
       city: c[0], region: c[1], country: c[2], lat: c[3], lng: c[4],
       company: `${LAST[(i * 5) % LAST.length]} ${["Group", "Labs", "Partners", "Health", "Capital"][i % 5]}`,
       title: ["CEO", "Founder", "COO", "VP Sales", "Managing Partner"][i % 5],
-      industry: ind, ai_industry: ind, bio: `Leads a ${ind.toLowerCase()} business in ${c[0]}.`,
+      industry: ind, industries: [ind], ai_industry: ind, bio: `Leads a ${ind.toLowerCase()} business in ${c[0]}.`,
       looking_for: "Partners and intros", can_help_with: "Scaling teams, go-to-market",
       linkedin: "linkedin.com/in/demo", instagram: "@demo", facebook: "demo", x: "@demo", tiktok: null,
       youtube: null, website: "example.com", whatsapp: "+12065550100",

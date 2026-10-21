@@ -5,6 +5,12 @@ import { buildSearchText, embed, enrichProfile } from "@/lib/gemini";
 import type { ProfileInput } from "@/lib/types";
 
 const s = (max: number) => z.string().trim().max(max).default("");
+// Trimmed, de-duplicated (case-insensitive) list of short labels.
+const list = (maxItems: number, maxLen: number) =>
+  z.array(z.string().trim().max(maxLen)).max(40).default([]).transform((xs) => {
+    const seen = new Set<string>();
+    return xs.filter((x) => x && !seen.has(x.toLowerCase()) && seen.add(x.toLowerCase())).slice(0, maxItems);
+  });
 
 const Profile = z.object({
   full_name: z.string().trim().min(1, "Please add your name.").max(120),
@@ -17,7 +23,7 @@ const Profile = z.object({
   lng: z.number().min(-180).max(180).nullable().default(null),
   company: s(160),
   title: s(160),
-  industry: s(120),
+  industries: list(8, 60),
   bio: s(1200),
   looking_for: s(600),
   can_help_with: s(600),
@@ -31,6 +37,8 @@ const Profile = z.object({
   whatsapp: s(40),
   show_email: z.boolean().default(true),
   show_phone: z.boolean().default(false),
+  ai_summary: s(600),
+  tags: list(20, 40),
 });
 
 export async function GET(req: Request) {
@@ -65,10 +73,16 @@ export async function POST(req: Request) {
     if (!parsed.success) throw new HttpError(400, parsed.error.issues[0]?.message || "Check the form and try again.");
     const p = parsed.data as ProfileInput;
 
-    const enrichment = await enrichProfile(p);
+    // The member's own summary/tags always win. Gemini only fills what's empty
+    // (or everything, after they press "Regenerate with AI", which clears them).
+    const needAi = !p.ai_summary || p.tags.length === 0 || p.lat === null;
+    const enrichment = needAi ? await enrichProfile(p) : null;
     const lat = p.lat ?? enrichment?.lat ?? null;
     const lng = p.lng ?? enrichment?.lng ?? null;
-    const searchText = buildSearchText(p, enrichment);
+    const summary = p.ai_summary || enrichment?.summary || null;
+    const tags = p.tags.length ? p.tags.map((t) => t.toLowerCase()) : enrichment?.tags || [];
+    const industries = p.industries.length ? p.industries : enrichment?.industry ? [enrichment.industry] : [];
+    const searchText = buildSearchText({ ...p, industries }, { tags, summary });
     const embedding = await embed(searchText, "document");
 
     const row = {
@@ -76,9 +90,11 @@ export async function POST(req: Request) {
       ...p,
       lat,
       lng,
-      ai_industry: enrichment?.industry || p.industry || null,
-      tags: enrichment?.tags || [],
-      ai_summary: enrichment?.summary || null,
+      industries,
+      industry: industries.join(", ") || null,
+      ai_industry: industries[0] || null,
+      tags,
+      ai_summary: summary,
       search_text: searchText,
       ...(embedding ? { embedding: JSON.stringify(embedding) } : {}),
       updated_at: new Date().toISOString(),
@@ -88,7 +104,7 @@ export async function POST(req: Request) {
     if (error) throw error;
     return Response.json({
       ok: true,
-      ai: { industry: row.ai_industry, tags: row.tags, summary: row.ai_summary, located: lat !== null },
+      ai: { industry: row.industry, tags: row.tags, summary: row.ai_summary, located: lat !== null },
     });
   } catch (err) {
     return errorResponse(err);

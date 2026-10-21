@@ -382,3 +382,18 @@ textarea.input { height: auto; min-height: 96px; padding: 12px 14px; resize: ver
 .join-btn:hover .shift i { animation-duration: 2.4s; }
 .join-label { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: 16px; letter-spacing: 0.01em; }
 .join-btn:hover .join-label { color: var(--yellow); }
+
+.person { cursor: pointer; }
+.quick-contacts { display: flex; gap: 4px; margin-top: 8px; flex-wrap: wrap; }
+.quick-contacts a { width: 30px; height: 30px; display: grid; place-items: center; border: 1px solid var(--line-2); color: var(--muted); transition: color 0.2s, border-color 0.2s, background 0.2s; }
+.quick-contacts a:hover { color: #141414; background: var(--yellow); border-color: var(--yellow); }
+.quick-contacts svg { width: 15px; height: 15px; }
+.tags.strong span { color: var(--text); border-color: var(--line-2); font-size: 13px; padding: 4px 10px; }
+
+.chip-input { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; min-height: 48px; padding: 7px 10px; background: var(--bg-2); border: 1px solid var(--line); cursor: text; }
+.chip-input:focus-within { border-color: var(--yellow); background: #252525; }
+.chip-input input { flex: 1; min-width: 120px; height: 32px; background: transparent; border: 0; outline: none; }
+.chip-input input::placeholder { color: var(--dim); }
+.chip-tag { display: inline-flex; align-items: center; gap: 6px; height: 30px; padding: 0 6px 0 10px; background: #2e2e2e; border: 1px solid var(--line-2); font-size: 13px; }
+.chip-tag button { color: var(--muted); display: grid; place-items: center; width: 18px; height: 18px; }
+.chip-tag button:hover { color: var(--text); }

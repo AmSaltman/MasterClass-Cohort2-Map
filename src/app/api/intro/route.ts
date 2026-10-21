@@ -3,7 +3,7 @@ import { adminClient, errorResponse, HttpError, rateLimit, requireUser } from "@
 import { CHAT_MODEL, gemini } from "@/lib/gemini";
 
 const Body = z.object({ to: z.string().uuid() });
-const COLS = "full_name,title,company,ai_industry,city,country,bio,looking_for,can_help_with,ai_summary";
+const COLS = "full_name,title,company,industries,city,country,bio,looking_for,can_help_with,ai_summary";
 
 // Drafts a short, personal first message from the signed-in member to a classmate.
 export async function POST(req: Request) {

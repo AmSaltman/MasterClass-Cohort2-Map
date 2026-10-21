@@ -103,18 +103,18 @@ export async function POST(req: Request) {
     // Small cohort (~1k): load a compact directory once per request for lookups and stats.
     const { data: all, error } = await adminClient()
       .from("members")
-      .select("id,full_name,title,company,ai_industry,city,region,country,lat,lng,tags,ai_summary,looking_for,can_help_with")
+      .select("id,full_name,title,company,industries,city,region,country,lat,lng,tags,ai_summary,looking_for,can_help_with")
       .limit(5000);
     if (error) throw error;
     const byId = new Map<string, Compact>();
     const industries = new Map<string, number>();
     for (const m of all || []) {
       byId.set(m.id, {
-        id: m.id, name: m.full_name, title: m.title, company: m.company, industry: m.ai_industry,
+        id: m.id, name: m.full_name, title: m.title, company: m.company, industries: m.industries,
         location: [m.city, m.region, m.country].filter(Boolean).join(", "),
         tags: m.tags, summary: m.ai_summary, looking_for: m.looking_for, can_help_with: m.can_help_with,
       });
-      if (m.ai_industry) industries.set(m.ai_industry, (industries.get(m.ai_industry) || 0) + 1);
+      for (const ind of (m.industries as string[]) || []) industries.set(ind, (industries.get(ind) || 0) + 1);
     }
     const me = (all || []).find((m) => m.id === user.id);
     const topIndustries = [...industries.entries()].sort((a, b) => b[1] - a[1]).slice(0, 30)

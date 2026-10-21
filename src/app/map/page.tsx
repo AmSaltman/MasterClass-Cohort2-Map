@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { GlobeHandle } from "@/components/Globe";
 import { Assistant, type AssistantHandle } from "@/components/Assistant";
+import { QuickContacts } from "@/components/Contacts";
 import { I } from "@/components/Icons";
 import { MemberDrawer } from "@/components/MemberDrawer";
 import { ShiftSquare, Square } from "@/components/Square";
@@ -14,8 +15,12 @@ import type { AssistantReply, Member } from "@/lib/types";
 
 const Globe = dynamic(() => import("@/components/Globe"), { ssr: false });
 
+function industriesOf(m: Member): string[] {
+  return m.industries?.length ? m.industries : m.industry ? [m.industry] : [];
+}
+
 function haystack(m: Member) {
-  return [m.full_name, m.title, m.company, m.industry, m.ai_industry, m.city, m.region, m.country, m.bio, m.looking_for, m.can_help_with, ...m.tags]
+  return [m.full_name, m.title, m.company, ...industriesOf(m), m.city, m.region, m.country, m.bio, m.looking_for, m.can_help_with, ...m.tags]
     .filter(Boolean).join(" ").toLowerCase();
 }
 
@@ -58,7 +63,7 @@ export default function MapPage() {
 
   const industries = useMemo(() => {
     const counts = new Map<string, number>();
-    members.forEach((m) => { const k = m.ai_industry || m.industry; if (k) counts.set(k, (counts.get(k) || 0) + 1); });
+    members.forEach((m) => industriesOf(m).forEach((k) => counts.set(k, (counts.get(k) || 0) + 1)));
     return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, 8).map(([k]) => k);
   }, [members]);
   const countries = useMemo(() => new Set(members.map((m) => m.country).filter(Boolean)).size, [members]);
@@ -67,7 +72,7 @@ export default function MapPage() {
     const tokens = query.toLowerCase().split(/\s+/).filter(Boolean);
     if (!tokens.length && !industry) return null;
     return index
-      .filter(([m, h]) => (!industry || (m.ai_industry || m.industry) === industry) && tokens.every((t) => h.includes(t)))
+      .filter(([m, h]) => (!industry || industriesOf(m).includes(industry)) && tokens.every((t) => h.includes(t)))
       .map(([m]) => m);
   }, [index, query, industry]);
 
@@ -111,7 +116,7 @@ export default function MapPage() {
     const next = industry === k ? null : k;
     setIndustry(next);
     if (next) {
-      const ids = members.filter((m) => (m.ai_industry || m.industry) === next).map((m) => m.id);
+      const ids = members.filter((m) => industriesOf(m).includes(next)).map((m) => m.id);
       setPanelOpen(true);
       globe.current?.fitMembers(ids);
     }
@@ -224,7 +229,11 @@ export default function MapPage() {
               </div>
             )}
             {listed.map((m) => (
-              <button key={m.id} className="person sq-host" onClick={() => { select(m.id); locate(m); }}>
+              <div
+                key={m.id} className="person sq-host" role="button" tabIndex={0}
+                onClick={() => { select(m.id); locate(m); }}
+                onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(m.id); locate(m); } }}
+              >
                 <span className="thumb">
                   {m.avatar_url ? (
                     <>
@@ -236,9 +245,10 @@ export default function MapPage() {
                 <div style={{ minWidth: 0 }}>
                   <b>{m.full_name}{m.id === meId ? " (you)" : ""}</b>
                   <div className="meta">{[m.title, m.company].filter(Boolean).join(" · ")}</div>
-                  <div className="loc">{[m.ai_industry || m.industry, [m.city, m.country].filter(Boolean).join(", ")].filter(Boolean).join(" — ")}</div>
+                  <div className="loc">{[industriesOf(m).join(" · "), [m.city, m.country].filter(Boolean).join(", ")].filter(Boolean).join(" — ")}</div>
+                  <QuickContacts member={m} />
                 </div>
-              </button>
+              </div>
             ))}
           </div>
         </aside>

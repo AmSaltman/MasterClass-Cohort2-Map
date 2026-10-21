@@ -37,7 +37,7 @@ export async function embed(text: string, kind: "document" | "query"): Promise<n
 }
 
 const Enrichment = z.object({
-  industry: z.string().max(60),
+  industry: z.string().max(60).nullable(),
   tags: z.array(z.string().max(40)).max(20),
   summary: z.string().max(400),
   lat: z.number().min(-90).max(90).nullable(),
@@ -49,19 +49,19 @@ const ENRICH_SCHEMA = {
   type: "object",
   properties: {
     industry: {
-      type: "string",
+      type: ["string", "null"],
       description:
-        "One normalized industry label in Title Case, e.g. 'Healthcare', 'Real Estate', 'Financial Services', 'Consumer Goods', 'Software & SaaS', 'Media & Entertainment', 'Education', 'Hospitality', 'Manufacturing', 'Energy', 'Legal', 'Nonprofit', 'Marketing & Advertising', 'AI & Machine Learning'.",
+        "Only used when the person listed NO industries: one short industry label clearly supported by what they wrote, or null if unclear.",
     },
     tags: {
       type: "array",
       items: { type: "string" },
       description:
-        "8-15 lowercase search keywords: skills, sub-industries, roles, markets, and common synonyms someone might search for (e.g. 'medtech', 'hospitals', 'fundraising', 'b2b saas', 'founder').",
+        "6-15 lowercase search keywords taken from what the person actually wrote (their industries, role, company focus, markets, skills), plus plain synonyms of those exact things (e.g. 'seo' -> 'search engine optimization'). Never add a field, skill or specialty they did not mention (e.g. do not add 'machine learning' just because they said 'AI').",
     },
     summary: {
       type: "string",
-      description: "1-2 sentence third-person summary of who this person is and what they do. Plain, factual, no hype. Refer to them by name — never guess gendered pronouns.",
+      description: "1-2 sentence third-person summary using only facts stated in the profile — no inferred specialties, titles or achievements. Plain, no hype. Refer to them by name — never guess gendered pronouns.",
     },
     lat: { type: ["number", "null"], description: "Latitude of the city center, or null if unknown." },
     lng: { type: ["number", "null"], description: "Longitude of the city center, or null if unknown." },
@@ -72,7 +72,7 @@ const ENRICH_SCHEMA = {
 // Turns a raw profile into normalized, searchable fields.
 export async function enrichProfile(p: ProfileInput): Promise<Enrichment | null> {
   const profile = {
-    name: p.full_name, title: p.title, company: p.company, industry: p.industry,
+    name: p.full_name, title: p.title, company: p.company, industries: p.industries,
     location: [p.city, p.region, p.country].filter(Boolean).join(", "),
     bio: p.bio, looking_for: p.looking_for, can_help_with: p.can_help_with,
     website: p.website,
@@ -80,7 +80,7 @@ export async function enrichProfile(p: ProfileInput): Promise<Enrichment | null>
   try {
     const res = await gemini().models.generateContent({
       model: CHAT_MODEL,
-      contents: `Organize this executive's cohort profile so classmates can find them by search.\n\n${JSON.stringify(profile)}`,
+      contents: `Organize this executive's cohort profile so classmates can find them by search. Stay strictly grounded in what they wrote — never infer specialties they didn't state.\n\n${JSON.stringify(profile)}`,
       config: {
         responseMimeType: "application/json",
         responseJsonSchema: ENRICH_SCHEMA,
@@ -91,7 +91,7 @@ export async function enrichProfile(p: ProfileInput): Promise<Enrichment | null>
     if (!parsed.success) return null;
     return {
       ...parsed.data,
-      industry: parsed.data.industry.trim(),
+      industry: parsed.data.industry?.trim() || null,
       tags: [...new Set(parsed.data.tags.map((t) => t.toLowerCase().trim()).filter(Boolean))].slice(0, 15),
     };
   } catch (err) {
@@ -100,9 +100,9 @@ export async function enrichProfile(p: ProfileInput): Promise<Enrichment | null>
   }
 }
 
-export function buildSearchText(p: ProfileInput, e: Enrichment | null): string {
+export function buildSearchText(p: ProfileInput, e: { tags: string[]; summary: string | null } | null): string {
   return [
-    p.full_name, p.title, p.company, p.industry, e?.industry,
+    p.full_name, p.title, p.company, p.industries.join(", "),
     [p.city, p.region, p.country].filter(Boolean).join(", "),
     p.bio, p.looking_for && `Looking for: ${p.looking_for}`,
     p.can_help_with && `Can help with: ${p.can_help_with}`,

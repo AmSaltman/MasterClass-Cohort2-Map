@@ -12,6 +12,7 @@ export type Member = {
   company: string | null;
   title: string | null;
   industry: string | null;
+  industries: string[];
   ai_industry: string | null;
   bio: string | null;
   looking_for: string | null;
@@ -41,7 +42,7 @@ export type ProfileInput = {
   lng: number | null;
   company: string;
   title: string;
-  industry: string;
+  industries: string[];
   bio: string;
   looking_for: string;
   can_help_with: string;
@@ -55,14 +56,17 @@ export type ProfileInput = {
   whatsapp: string;
   show_email: boolean;
   show_phone: boolean;
+  // What the AI says about them — editable by the member.
+  ai_summary: string;
+  tags: string[];
 };
 
 export const EMPTY_PROFILE: ProfileInput = {
   full_name: "", email: "", phone: "", city: "", region: "", country: "",
-  lat: null, lng: null, company: "", title: "", industry: "", bio: "",
+  lat: null, lng: null, company: "", title: "", industries: [], bio: "",
   looking_for: "", can_help_with: "", linkedin: "", instagram: "", facebook: "",
   x: "", tiktok: "", youtube: "", website: "", whatsapp: "",
-  show_email: true, show_phone: false,
+  show_email: true, show_phone: false, ai_summary: "", tags: [],
 };
 
 export type ChatTurn = { role: "user" | "assistant"; text: string };

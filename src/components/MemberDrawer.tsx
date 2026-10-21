@@ -1,20 +1,12 @@
 "use client";
-import { useEffect, useState, type ReactNode } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
+import { ContactGrid } from "./Contacts";
 import { I } from "./Icons";
 import { Square } from "./Square";
 import { api } from "@/lib/supabase-browser";
-import { digits, dmUrl, profileUrl, vcard, whatsappUrl } from "@/lib/social";
+import { vcard } from "@/lib/social";
 import type { Member } from "@/lib/types";
-
-function Contact({ href, icon, label }: { href: string | null; icon: ReactNode; label: string }) {
-  if (!href) return null;
-  const external = href.startsWith("http");
-  return (
-    <a className="contact" href={href} {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
-      {icon}{label}
-    </a>
-  );
-}
 
 export function MemberDrawer({
   member, isMe, onClose, onLocate,
@@ -72,8 +64,6 @@ export function MemberDrawer({
   }
 
   const m = member;
-  const phone = digits(m?.phone);
-  const introBody = intro ? encodeURIComponent(intro) : "";
   const location = m ? [m.city, m.region, m.country].filter(Boolean).join(", ") : "";
 
   return (
@@ -96,35 +86,32 @@ export function MemberDrawer({
               )}
             </div>
 
+            <div className="kv">
+              <span className="label">{isMe ? "How classmates reach you" : "Reach out"}</span>
+              <ContactGrid
+                member={m}
+                message={intro}
+                extra={!isMe && <button className="contact" onClick={saveContact}><I.download />Save contact</button>}
+              />
+              {isMe && (
+                <Link href="/profile" className="muted" style={{ fontSize: 13, textDecoration: "underline", marginTop: 4 }}>
+                  Edit your contact info and what the AI says about you
+                </Link>
+              )}
+            </div>
+
             {m.ai_summary && <p className="serif" style={{ fontSize: 19, lineHeight: 1.4 }}>{m.ai_summary}</p>}
 
-            {(m.ai_industry || m.industry) && (
-              <div className="kv"><span className="label">Industry</span><span>{m.ai_industry || m.industry}</span></div>
+            {(m.industries?.length || m.industry) && (
+              <div className="kv">
+                <span className="label">{(m.industries?.length || 0) > 1 ? "Industries" : "Industry"}</span>
+                <div className="tags strong">{(m.industries?.length ? m.industries : [m.industry!]).map((t) => <span key={t}>{t}</span>)}</div>
+              </div>
             )}
             {m.bio && <div className="kv"><span className="label">What they do</span><span style={{ whiteSpace: "pre-wrap" }}>{m.bio}</span></div>}
             {m.looking_for && <div className="kv"><span className="label">Looking for</span><span>{m.looking_for}</span></div>}
             {m.can_help_with && <div className="kv"><span className="label">Can help with</span><span>{m.can_help_with}</span></div>}
             {m.tags.length > 0 && <div className="tags">{m.tags.map((t) => <span key={t}>{t}</span>)}</div>}
-
-            {!isMe && (
-              <div className="kv">
-                <span className="label">Reach out</span>
-                <div className="contact-grid">
-                  <Contact href={m.email ? `mailto:${m.email}${intro ? `?subject=${encodeURIComponent("MasterClass Executive — hello")}&body=${introBody}` : ""}` : null} icon={<I.mail />} label="Email" />
-                  <Contact href={phone ? `sms:${phone}${intro ? `?&body=${introBody}` : ""}` : null} icon={<I.sms />} label="Text" />
-                  <Contact href={phone ? `tel:${phone}` : null} icon={<I.phone />} label="Call" />
-                  <Contact href={whatsappUrl(m.whatsapp || m.phone) && (whatsappUrl(m.whatsapp || m.phone) + (intro ? `?text=${introBody}` : ""))} icon={<I.whatsapp />} label="WhatsApp" />
-                  <Contact href={profileUrl("linkedin", m.linkedin)} icon={<I.linkedin />} label="LinkedIn" />
-                  <Contact href={dmUrl("instagram", m.instagram)} icon={<I.instagram />} label="Instagram DM" />
-                  <Contact href={dmUrl("facebook", m.facebook)} icon={<I.facebook />} label="Messenger" />
-                  <Contact href={profileUrl("x", m.x)} icon={<I.x />} label="X" />
-                  <Contact href={profileUrl("tiktok", m.tiktok)} icon={<I.tiktok />} label="TikTok" />
-                  <Contact href={profileUrl("youtube", m.youtube)} icon={<I.youtube />} label="YouTube" />
-                  <Contact href={profileUrl("website", m.website)} icon={<I.link />} label="Website" />
-                  <button className="contact" onClick={saveContact}><I.download />Save contact</button>
-                </div>
-              </div>
-            )}
 
             {!isMe && (
               <div className="kv">
